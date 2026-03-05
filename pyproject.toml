@@ -1,11 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "ryanair-flight-search"
 version = "0.1.0"
 description = "Find one-stop connecting flights on Ryanair"
-requires-python = ">=3.12"
-dependencies = [
-    "requests>=2.32.3",
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.14"
+authors = [{ name = "Vito" }]
+keywords = ["ryanair", "flights", "travel", "connecting-flights"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
 ]
+dependencies = ["requests>=2.32.3"]
 
 [project.scripts]
-ryanair-search = "ryanair_search:main"
+ryanair-search = "ryanair_flight_search.cli:main"
+
+[project.urls]
+Repository = "https://github.com/your-username/ryanair-flight-search"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "types-requests>=2.32",
+    "pre-commit>=4.0",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+mypy_path = "src"
+packages = ["ryanair_flight_search"]
+python_version = "3.14"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_optional = true
+strict_equality = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+addopts = "-q --cov=ryanair_flight_search --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ryanair_flight_search"]

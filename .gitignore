@@ -2,4 +2,12 @@ __pycache__/
 *.pyc
 .venv/
 ryanair_cache.db
+connections.json
 .DS_Store
+dist/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
