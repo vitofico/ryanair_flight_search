@@ -4,7 +4,7 @@ from datetime import date
 from unittest.mock import MagicMock
 
 from ryanair_flight_search.itinerary import ItineraryBuilder
-from ryanair_flight_search.search import FlightSearcher, _date_range
+from ryanair_flight_search.search import FlightSearcher, SearchProgress, _date_range
 
 
 class TestDateRange:
@@ -62,3 +62,38 @@ class TestFlightSearcher:
         )
 
         assert results == []
+
+    def test_on_progress_callback(self, sample_flight_a, sample_flight_b):
+        mock_client = MagicMock()
+        mock_client.get_available_dates.return_value = [date(2026, 3, 10)]
+        mock_client.get_flights.side_effect = [
+            [sample_flight_a],
+            [sample_flight_b],
+            [sample_flight_a],
+            [sample_flight_b],
+        ]
+
+        builder = ItineraryBuilder()
+        searcher = FlightSearcher(client=mock_client, builder=builder)
+
+        progress_events: list[SearchProgress] = []
+        searcher.search(
+            origin="CRV",
+            connections=["BGY", "CRL"],
+            destination="SVQ",
+            start_date=date(2026, 3, 10),
+            end_date=date(2026, 3, 10),
+            on_progress=progress_events.append,
+        )
+
+        assert len(progress_events) == 2
+
+        assert progress_events[0].connection == "BGY"
+        assert progress_events[0].current == 1
+        assert progress_events[0].total == 2
+        assert "BGY" in progress_events[0].message
+        assert "1/2" in progress_events[0].message
+
+        assert progress_events[1].connection == "CRL"
+        assert progress_events[1].current == 2
+        assert progress_events[1].total == 2

@@ -1,7 +1,7 @@
 """Tests for CLI."""
 
 from datetime import date
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -133,7 +133,6 @@ class TestBuildCache:
         assert _build_cache(no_cache=True) is None
 
     def test_with_cache(self, tmp_path, monkeypatch):
-
         monkeypatch.chdir(tmp_path)
         cache = _build_cache(no_cache=False)
         assert cache is not None
@@ -159,12 +158,7 @@ class TestCmdSearch:
 
     def test_search_with_explicit_connections(self, monkeypatch, tmp_path):
         monkeypatch.chdir(tmp_path)
-        mock_searcher = MagicMock()
-        mock_searcher.search.return_value = []
-        with (
-            patch("ryanair_flight_search.cli.FlightSearcher", return_value=mock_searcher),
-            patch("ryanair_flight_search.cli.RyanairAPIClient"),
-        ):
+        with patch("ryanair_flight_search.cli.search_itineraries", return_value=[]) as mock_search:
             args = parse_args(
                 [
                     "search",
@@ -178,4 +172,4 @@ class TestCmdSearch:
                 ]
             )
             cmd_search(args)
-            mock_searcher.search.assert_called_once()
+            mock_search.assert_called_once()

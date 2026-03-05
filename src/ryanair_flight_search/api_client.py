@@ -14,6 +14,7 @@ from urllib3.util.retry import Retry
 
 from .cache import SQLiteCache
 from .config import (
+    AIRPORTS_ENDPOINT,
     AVAILABILITY_ENDPOINT,
     AVAILABLE_DATES_ENDPOINT,
     BASE_URL,
@@ -95,6 +96,35 @@ class RyanairAPIClient:
         except requests.exceptions.RequestException as e:
             raise APIError(str(e)) from e
 
+    def get_airports(self) -> list[dict[str, str]]:
+        """Get all active Ryanair airports with IATA code, name, and country."""
+        url = BASE_URL + AIRPORTS_ENDPOINT
+
+        try:
+            data = self._get(url)
+            if isinstance(data, list):
+                return [
+                    {
+                        "code": a["code"],
+                        "name": a.get("name", ""),
+                        "city": (
+                            a.get("city", {}).get("name", "")
+                            if isinstance(a.get("city"), dict)
+                            else ""
+                        ),
+                        "country": (
+                            a.get("country", {}).get("name", "")
+                            if isinstance(a.get("country"), dict)
+                            else ""
+                        ),
+                    }
+                    for a in data
+                    if "code" in a
+                ]
+            return []
+        except APIError:
+            return []
+
     def get_available_dates(self, origin: str, destination: str) -> list[date]:
         """Get available flight dates for a route."""
         url = BASE_URL + AVAILABLE_DATES_ENDPOINT.format(
@@ -109,7 +139,7 @@ class RyanairAPIClient:
                 for date_str in data:
                     try:
                         dates.append(datetime.strptime(date_str, "%Y-%m-%d").date())
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         continue
             return dates
 

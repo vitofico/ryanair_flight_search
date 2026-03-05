@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from datetime import date, timedelta
 
 from .api_client import RyanairAPIClient
@@ -11,6 +12,17 @@ from .itinerary import ItineraryBuilder
 from .models import Itinerary
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SearchProgress:
+    connection: str
+    current: int  # 1-based index
+    total: int
+    message: str
+
+
+ProgressCallback = Callable[[SearchProgress], None]
 
 
 class FlightSearcher:
@@ -31,6 +43,7 @@ class FlightSearcher:
         destination: str,
         start_date: date,
         end_date: date,
+        on_progress: ProgressCallback | None = None,
     ) -> list[Itinerary]:
         """Search for connecting flight itineraries."""
         all_itineraries: list[Itinerary] = []
@@ -45,7 +58,16 @@ class FlightSearcher:
         )
         logger.info("Date range: %s to %s (%d days)", start_date, end_date, len(date_range))
 
-        for connection in connections:
+        for i, connection in enumerate(connections, 1):
+            if on_progress:
+                on_progress(
+                    SearchProgress(
+                        connection=connection,
+                        current=i,
+                        total=len(connections),
+                        message=f"Processing {connection} ({i}/{len(connections)})...",
+                    )
+                )
             logger.info("Processing connection: %s", connection)
             itineraries = self._search_via_connection(
                 origin=origin,

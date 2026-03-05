@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Responsive web GUI (FastAPI + React/Vite) accessible via `ryanair-web` command
+- Real-time search progress via Server-Sent Events (SSE) with polling fallback
+- Airport autocomplete with search by IATA code, city, or country name
+- Itinerary comparison page with cross-search selection, summary strip, and export (JSON/CSV)
+- Service layer (`services.py`) shared between CLI and web API
+- Progress callback support in `FlightSearcher.search()`
+- Multi-stage Docker build serving both CLI and web UI
+- Active airports API endpoint integration
+
+### Changed
+- CLI refactored to thin adapter using shared service layer
 - Professional `src/` layout with modular package structure
 - SQLite-based API response caching with configurable expiry
 - Domain exceptions (`APIError`, `CacheError`, `InvalidRouteError`)

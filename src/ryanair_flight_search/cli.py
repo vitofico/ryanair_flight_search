@@ -9,7 +9,6 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
-from .api_client import RyanairAPIClient
 from .cache import SQLiteCache
 from .config import (
     CONNECTIONS_FILENAME,
@@ -21,9 +20,8 @@ from .config import (
     DEFAULT_ORIGIN,
 )
 from .exceptions import APIError
-from .itinerary import ItineraryBuilder
 from .output import output_json, output_table
-from .search import FlightSearcher
+from .services import discover_connections, search_itineraries
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +42,7 @@ def load_connections(origin: str, destination: str) -> list[str] | None:
         if entry:
             result: list[str] = entry["connections"]
             return result
-    except json.JSONDecodeError, KeyError:
+    except (json.JSONDecodeError, KeyError):
         pass
     return None
 
@@ -89,26 +87,8 @@ def cmd_discover(args: argparse.Namespace) -> None:
     destination = args.destination.upper()
 
     cache = _build_cache(args.no_cache)
-    client = RyanairAPIClient(cache=cache)
+    connections = discover_connections(origin, destination, cache=cache)
 
-    logger.info("Discovering connections for %s -> ??? -> %s", origin, destination)
-    logger.info("  Fetching routes from %s...", origin)
-    from_origin = set(client.get_destinations(origin))
-    logger.info(
-        "    %d destinations: %s",
-        len(from_origin),
-        ", ".join(sorted(from_origin)),
-    )
-
-    logger.info("  Fetching routes from %s (reverse)...", destination)
-    from_destination = set(client.get_destinations(destination))
-    logger.info(
-        "    %d destinations: %s",
-        len(from_destination),
-        ", ".join(sorted(from_destination)),
-    )
-
-    connections = sorted(from_origin & from_destination - {origin, destination})
     logger.info("Valid connections (%d): %s", len(connections), ", ".join(connections))
 
     save_connections(origin, destination, connections)
@@ -150,23 +130,19 @@ def cmd_search(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     cache = _build_cache(args.no_cache)
-    client = RyanairAPIClient(currency=args.currency, cache=cache)
-
-    builder = ItineraryBuilder(
-        min_connection_minutes=args.min_connection_minutes,
-        max_connection_hours=args.max_connection_hours,
-        allow_overnight=args.allow_overnight,
-    )
-
-    searcher = FlightSearcher(client=client, builder=builder)
 
     try:
-        itineraries = searcher.search(
+        itineraries = search_itineraries(
             origin=origin,
-            connections=connections,
             destination=destination,
+            connections=connections,
             start_date=start_date,
             end_date=end_date,
+            currency=args.currency,
+            min_connection_minutes=args.min_connection_minutes,
+            max_connection_hours=args.max_connection_hours,
+            allow_overnight=args.allow_overnight,
+            cache=cache,
         )
     except APIError as e:
         logger.error("API request failed: %s", e)
