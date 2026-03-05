@@ -11,7 +11,32 @@ import {
 import SearchForm from "../components/SearchForm";
 import ProgressPanel from "../components/ProgressPanel";
 import ItineraryList from "../components/ItineraryList";
+import RecentSearches from "../components/RecentSearches";
 import { useCompare } from "../context/CompareContext";
+
+const RECENT_KEY = "ryanair-recent-searches";
+const MAX_RECENT = 3;
+
+function loadRecent(): SearchParams[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw) as SearchParams[];
+    return Array.isArray(arr) ? arr.slice(0, MAX_RECENT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(params: SearchParams): void {
+  const existing = loadRecent();
+  const key = `${params.origin}-${params.destination}-${params.start}-${params.end}`;
+  const filtered = existing.filter(
+    (p) => `${p.origin}-${p.destination}-${p.start}-${p.end}` !== key,
+  );
+  const updated = [params, ...filtered].slice(0, MAX_RECENT);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+}
 
 type PageState = "idle" | "searching" | "results" | "error";
 
@@ -22,6 +47,8 @@ export default function SearchPage() {
   const [result, setResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [recentSearches, setRecentSearches] = useState<SearchParams[]>(loadRecent);
+  const [prefill, setPrefill] = useState<SearchParams | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -34,6 +61,9 @@ export default function SearchPage() {
     setProgress(null);
     setResult(null);
     setError(null);
+
+    saveRecent(params);
+    setRecentSearches(loadRecent());
 
     try {
       const { job_id } = await createSearchJob(params);
@@ -88,6 +118,11 @@ export default function SearchPage() {
     setResult(null);
     setError(null);
     setJobId(null);
+    setPrefill(null);
+  }, []);
+
+  const handleSelectRecent = useCallback((params: SearchParams) => {
+    setPrefill({ ...params });
   }, []);
 
   return (
@@ -98,7 +133,17 @@ export default function SearchPage() {
       </header>
 
       <main className="page-main">
-        {state === "idle" && <SearchForm onSearch={handleSearch} />}
+        {state === "idle" && (
+          <>
+            <SearchForm onSearch={handleSearch} initialParams={prefill} />
+            {recentSearches.length > 0 && (
+              <RecentSearches
+                searches={recentSearches}
+                onSelect={handleSelectRecent}
+              />
+            )}
+          </>
+        )}
 
         {state === "searching" && (
           <ProgressPanel progress={progress} onCancel={handleCancel} />

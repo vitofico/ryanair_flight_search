@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Progress callback support in `FlightSearcher.search()`
 - Multi-stage Docker build serving both CLI and web UI
 - Active airports API endpoint integration
+- Recent searches (last 3) with one-click form prefill via localStorage
+- "Skip cache" checkbox to force fresh results from Ryanair API
 
 ### Changed
 - CLI refactored to thin adapter using shared service layer

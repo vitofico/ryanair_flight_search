@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import type { SearchParams } from "../api/client";
 import AirportField from "./AirportField";
 import DateRangeField from "./DateRangeField";
@@ -7,6 +7,7 @@ import AdvancedOptions from "./AdvancedOptions";
 
 interface SearchFormProps {
   onSearch: (params: SearchParams) => void;
+  initialParams?: SearchParams | null;
 }
 
 const IATA_RE = /^[A-Z]{3}$/;
@@ -18,7 +19,7 @@ function parseConnections(raw: string): string[] {
     .filter((s) => IATA_RE.test(s));
 }
 
-export default function SearchForm({ onSearch }: SearchFormProps) {
+export default function SearchForm({ onSearch, initialParams }: SearchFormProps) {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [start, setStart] = useState("");
@@ -28,6 +29,22 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
   const [minConnectionMinutes, setMinConnectionMinutes] = useState(60);
   const [maxConnectionHours, setMaxConnectionHours] = useState(8);
   const [allowOvernight, setAllowOvernight] = useState(false);
+  const [noCache, setNoCache] = useState(false);
+
+  useEffect(() => {
+    if (initialParams) {
+      setOrigin(initialParams.origin);
+      setDestination(initialParams.destination);
+      setStart(initialParams.start);
+      setEnd(initialParams.end);
+      setConnectionsRaw(initialParams.connections.join(", "));
+      setCurrency(initialParams.currency);
+      setMinConnectionMinutes(initialParams.min_connection_minutes);
+      setMaxConnectionHours(initialParams.max_connection_hours);
+      setAllowOvernight(initialParams.allow_overnight);
+      setNoCache(false);
+    }
+  }, [initialParams]);
 
   const connections = parseConnections(connectionsRaw);
   const validDates = start !== "" && end !== "" && start <= end;
@@ -50,7 +67,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
       min_connection_minutes: minConnectionMinutes,
       max_connection_hours: maxConnectionHours,
       allow_overnight: allowOvernight,
-      no_cache: false,
+      no_cache: noCache,
     });
   }
 
@@ -96,9 +113,19 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         onAllowOvernightChange={setAllowOvernight}
       />
 
-      <button type="submit" className="btn btn-primary btn-search" disabled={!canSubmit}>
-        Search Flights
-      </button>
+      <div className="search-submit-row">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={noCache}
+            onChange={(e) => setNoCache(e.target.checked)}
+          />
+          Skip cache (force fresh results)
+        </label>
+        <button type="submit" className="btn btn-primary btn-search" disabled={!canSubmit}>
+          Search Flights
+        </button>
+      </div>
     </form>
   );
 }
