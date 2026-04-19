@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -169,31 +169,31 @@ class RyanairAPIClient:
     def get_flights(
         self, origin: str, destination: str, date_from: date, date_to: date
     ) -> list[Flight]:
-        """Get available flights for a route and date range via the farfnd API."""
-        url = BASE_URL + FARFND_ONEWAY_FARES_ENDPOINT
-        params = {
-            "departureAirportIataCode": origin.upper(),
-            "arrivalAirportIataCode": destination.upper(),
-            "outboundDepartureDateFrom": date_from.strftime("%Y-%m-%d"),
-            "outboundDepartureDateTo": date_to.strftime("%Y-%m-%d"),
-            "currency": self.currency,
-        }
+        """Get available flights for a route and date range via the farfnd API.
 
-        try:
-            flights: list[Flight] = []
-            page = 0
-            while True:
-                page_params = {**params, "offset": str(page)}
-                data = self._get(url, page_params)
+        Queries each day individually because the farfnd endpoint only returns
+        the single cheapest fare across the entire date range.
+        """
+        url = BASE_URL + FARFND_ONEWAY_FARES_ENDPOINT
+        flights: list[Flight] = []
+        current = date_from
+        while current <= date_to:
+            day_str = current.strftime("%Y-%m-%d")
+            params = {
+                "departureAirportIataCode": origin.upper(),
+                "arrivalAirportIataCode": destination.upper(),
+                "outboundDepartureDateFrom": day_str,
+                "outboundDepartureDateTo": day_str,
+                "currency": self.currency,
+            }
+            try:
+                data = self._get(url, params)
                 flights.extend(self._parse_farfnd_fares(data))
-                if data.get("nextPage") is None:
-                    break
-                page = data["nextPage"]
-            return flights
-        except APIError as e:
-            if e.status_code in (400, 404, 409):
-                return []
-            raise
+            except APIError as e:
+                if e.status_code not in (400, 404, 409):
+                    raise
+            current += timedelta(days=1)
+        return flights
 
     def _parse_farfnd_fares(self, data: Any) -> list[Flight]:
         flights: list[Flight] = []
