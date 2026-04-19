@@ -15,10 +15,10 @@ from urllib3.util.retry import Retry
 from .cache import SQLiteCache
 from .config import (
     AIRPORTS_ENDPOINT,
-    AVAILABILITY_ENDPOINT,
     AVAILABLE_DATES_ENDPOINT,
     BASE_URL,
     DEFAULT_CURRENCY,
+    FARFND_ONEWAY_FARES_ENDPOINT,
     RATE_LIMIT_DELAY_SECONDS,
     REQUEST_TIMEOUT_SECONDS,
     ROUTES_ENDPOINT,
@@ -144,7 +144,7 @@ class RyanairAPIClient:
             return dates
 
         except APIError as e:
-            if e.status_code == 404:
+            if e.status_code in (404, 409):
                 return []
             raise
 
@@ -166,107 +166,63 @@ class RyanairAPIClient:
                 return []
             raise
 
-    def get_flights(self, origin: str, destination: str, date_out: date) -> list[Flight]:
-        """Get available flights for a specific route and date."""
-        url = BASE_URL + AVAILABILITY_ENDPOINT
+    def get_flights(
+        self, origin: str, destination: str, date_from: date, date_to: date
+    ) -> list[Flight]:
+        """Get available flights for a route and date range via the farfnd API."""
+        url = BASE_URL + FARFND_ONEWAY_FARES_ENDPOINT
         params = {
-            "Origin": origin.upper(),
-            "Destination": destination.upper(),
-            "DateOut": date_out.strftime("%Y-%m-%d"),
-            "RoundTrip": "false",
-            "IncludeConnectingFlights": "false",
-            "ADT": "1",
-            "TEEN": "0",
-            "CHD": "0",
-            "INF": "0",
-            "Disc": "0",
-            "promoCode": "",
-            "ToUs": "AGREED",
-            "FlexDaysBeforeOut": "0",
-            "FlexDaysOut": "0",
-            "FlexDaysBeforeIn": "0",
-            "FlexDaysIn": "0",
+            "departureAirportIataCode": origin.upper(),
+            "arrivalAirportIataCode": destination.upper(),
+            "outboundDepartureDateFrom": date_from.strftime("%Y-%m-%d"),
+            "outboundDepartureDateTo": date_to.strftime("%Y-%m-%d"),
+            "currency": self.currency,
         }
 
         try:
-            data = self._get(url, params)
-            return self._parse_flights(data, origin, destination)
+            flights: list[Flight] = []
+            page = 0
+            while True:
+                page_params = {**params, "offset": str(page)}
+                data = self._get(url, page_params)
+                flights.extend(self._parse_farfnd_fares(data))
+                if data.get("nextPage") is None:
+                    break
+                page = data["nextPage"]
+            return flights
         except APIError as e:
-            if e.status_code in (404, 400):
+            if e.status_code in (400, 404, 409):
                 return []
             raise
 
-    def _parse_flights(self, data: Any, origin: str, destination: str) -> list[Flight]:
-        flights = []
-
-        try:
-            for trip in data.get("trips", []):
-                if (
-                    trip.get("origin") != origin.upper()
-                    or trip.get("destination") != destination.upper()
-                ):
+    def _parse_farfnd_fares(self, data: Any) -> list[Flight]:
+        flights: list[Flight] = []
+        for fare in data.get("fares", []):
+            try:
+                outbound = fare["outbound"]
+                dep_dt = parse_datetime(outbound["departureDate"])
+                arr_dt = parse_datetime(outbound["arrivalDate"])
+                if not dep_dt or not arr_dt:
                     continue
 
-                for trip_date in trip.get("dates", []):
-                    for flight_data in trip_date.get("flights", []):
-                        flight = self._parse_single_flight(flight_data, origin, destination)
-                        if flight:
-                            flights.append(flight)
+                price_data = outbound.get("price")
+                price = Decimal(str(price_data["value"])) if price_data else None
+                currency = price_data["currencyCode"] if price_data else self.currency
 
-        except (KeyError, TypeError, ValueError) as e:
-            logger.warning("Error parsing flight data: %s", e)
-
+                flights.append(
+                    Flight(
+                        origin=outbound["departureAirport"]["iataCode"],
+                        destination=outbound["arrivalAirport"]["iataCode"],
+                        flight_number=outbound.get("flightNumber"),
+                        departure_datetime=dep_dt,
+                        arrival_datetime=arr_dt,
+                        price=price,
+                        currency=currency,
+                    )
+                )
+            except (KeyError, TypeError, ValueError) as e:
+                logger.warning("Error parsing farfnd fare: %s", e)
         return flights
-
-    def _parse_single_flight(
-        self, flight_data: Any, origin: str, destination: str
-    ) -> Flight | None:
-        try:
-            departure_str = flight_data.get("time", [None, None])[0]
-            arrival_str = flight_data.get("time", [None, None])[1]
-
-            if not departure_str:
-                departure_str = flight_data.get("timeUTC", [None, None])[0]
-            if not arrival_str:
-                arrival_str = flight_data.get("timeUTC", [None, None])[1]
-
-            if not departure_str or not arrival_str:
-                return None
-
-            departure_dt = parse_datetime(departure_str)
-            arrival_dt = parse_datetime(arrival_str)
-
-            if not departure_dt or not arrival_dt:
-                return None
-
-            flight_number = flight_data.get("flightNumber")
-
-            price = None
-            regular_fare = flight_data.get("regularFare")
-            if regular_fare:
-                fares = regular_fare.get("fares", [])
-                if fares:
-                    amounts = [
-                        Decimal(str(f.get("amount", 0)))
-                        for f in fares
-                        if f.get("amount") is not None
-                    ]
-                    if amounts:
-                        price = min(amounts)
-
-            return Flight(
-                origin=origin.upper(),
-                destination=destination.upper(),
-                flight_number=flight_number,
-                departure_datetime=departure_dt,
-                arrival_datetime=arrival_dt,
-                price=price,
-                currency=self.currency,
-            )
-
-        except Exception as e:
-            logger.warning("Error parsing flight: %s", e)
-            return None
 
 
 def parse_datetime(dt_str: str) -> datetime | None:

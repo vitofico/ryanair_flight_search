@@ -46,6 +46,29 @@ The search command will:
 - Find all valid connecting itineraries
 - Sort results by price, then arrival time
 
+## Web UI
+
+Run the backend and frontend dev server in two terminals:
+
+```bash
+# Terminal 1: API server (port 8000)
+uv run ryanair-web
+
+# Terminal 2: Vite dev server (port 5173)
+cd frontend && npm run dev
+```
+
+Open http://localhost:5173.
+
+For production, build the frontend and serve everything from the backend:
+
+```bash
+cd frontend && npm run build
+uv run ryanair-web
+```
+
+Then open http://localhost:8000.
+
 ## Usage
 
 ### `discover` command
@@ -111,6 +134,8 @@ src/ryanair_flight_search/
   models.py       - Flight and Itinerary data models
   output.py       - Table and JSON output formatters
   exceptions.py   - Domain exception types
+  webapi/         - FastAPI backend for the web UI
+frontend/         - React + Vite frontend
 ```
 
 ## Development

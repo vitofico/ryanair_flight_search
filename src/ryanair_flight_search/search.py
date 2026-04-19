@@ -73,7 +73,8 @@ class FlightSearcher:
                 origin=origin,
                 connection=connection,
                 destination=destination,
-                date_range=date_range,
+                start_date=start_date,
+                end_date=end_date,
             )
             all_itineraries.extend(itineraries)
             logger.info("  Found %d itineraries via %s", len(itineraries), connection)
@@ -89,35 +90,14 @@ class FlightSearcher:
         origin: str,
         connection: str,
         destination: str,
-        date_range: list[date],
+        start_date: date,
+        end_date: date,
     ) -> list[Itinerary]:
-        logger.info("  Fetching available dates for %s->%s...", origin, connection)
-        origin_to_conn_dates = set(self.client.get_available_dates(origin, connection))
+        logger.info("  Fetching flights for %s->%s...", origin, connection)
+        first_leg_flights = self.client.get_flights(origin, connection, start_date, end_date)
 
-        logger.info("  Fetching available dates for %s->%s...", connection, destination)
-        conn_to_dest_dates = set(self.client.get_available_dates(connection, destination))
-
-        date_range_set = set(date_range)
-        origin_to_conn_dates &= date_range_set
-        conn_to_dest_dates &= date_range_set
-
-        if not origin_to_conn_dates or not conn_to_dest_dates:
-            logger.info("  No overlapping dates available")
-            return []
-
-        logger.info(
-            "  Available dates: %d for first leg, %d for second leg",
-            len(origin_to_conn_dates),
-            len(conn_to_dest_dates),
-        )
-
-        first_leg_flights = []
-        for d in sorted(origin_to_conn_dates):
-            first_leg_flights.extend(self.client.get_flights(origin, connection, d))
-
-        second_leg_flights = []
-        for d in sorted(conn_to_dest_dates):
-            second_leg_flights.extend(self.client.get_flights(connection, destination, d))
+        logger.info("  Fetching flights for %s->%s...", connection, destination)
+        second_leg_flights = self.client.get_flights(connection, destination, start_date, end_date)
 
         logger.info(
             "  Fetched %d flights for first leg, %d for second leg",

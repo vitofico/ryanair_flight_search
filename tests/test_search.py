@@ -26,7 +26,6 @@ class TestDateRange:
 class TestFlightSearcher:
     def test_search_combines_connections(self, sample_flight_a, sample_flight_b):
         mock_client = MagicMock()
-        mock_client.get_available_dates.return_value = [date(2026, 3, 10)]
         mock_client.get_flights.side_effect = [
             [sample_flight_a],  # CRV -> BGY
             [sample_flight_b],  # BGY -> SVQ
@@ -46,9 +45,9 @@ class TestFlightSearcher:
         assert len(results) == 1
         assert results[0].connection_airport == "BGY"
 
-    def test_search_no_dates_returns_empty(self):
+    def test_search_no_flights_returns_empty(self):
         mock_client = MagicMock()
-        mock_client.get_available_dates.return_value = []
+        mock_client.get_flights.return_value = []
 
         builder = ItineraryBuilder()
         searcher = FlightSearcher(client=mock_client, builder=builder)
@@ -65,7 +64,6 @@ class TestFlightSearcher:
 
     def test_on_progress_callback(self, sample_flight_a, sample_flight_b):
         mock_client = MagicMock()
-        mock_client.get_available_dates.return_value = [date(2026, 3, 10)]
         mock_client.get_flights.side_effect = [
             [sample_flight_a],
             [sample_flight_b],

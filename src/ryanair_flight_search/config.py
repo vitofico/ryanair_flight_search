@@ -3,7 +3,7 @@
 # -- Ryanair API --
 BASE_URL = "https://www.ryanair.com"
 AVAILABLE_DATES_ENDPOINT = "/api/farfnd/v4/oneWayFares/{origin}/{destination}/availabilities"
-AVAILABILITY_ENDPOINT = "/api/booking/v4/en-gb/availability"
+FARFND_ONEWAY_FARES_ENDPOINT = "/api/farfnd/v4/oneWayFares"
 ROUTES_ENDPOINT = "/api/views/locate/searchWidget/routes/en/airport/{iata}"
 AIRPORTS_ENDPOINT = "/api/views/locate/5/airports/en/active"
 USER_AGENT = (
