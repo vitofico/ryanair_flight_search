@@ -1,171 +1,206 @@
-# Ryanair Connecting Flight Search
+<h1 align="center">Ryanair Connecting Flight Search</h1>
 
-Find one-stop connecting flights on Ryanair between airports that don't have direct routes.
+<p align="center">
+  <em>Ryanair won't sell you a connecting ticket.<br>
+  This finds the two flights that make one anyway.</em>
+</p>
 
-Ryanair doesn't sell connecting tickets, but you can book two separate one-way flights through an intermediate airport. This tool automates finding those connections.
+<p align="center">
+  <a href="https://github.com/vitofico/ryanair_flight_search/actions/workflows/ci.yml"><img src="https://github.com/vitofico/ryanair_flight_search/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/python-3.11%2B-blue.svg" alt="Python 3.11+">
+</p>
+
+## What it is
+
+Say you want to get from Dublin to Seville. Ryanair flies both routes through Milan Bergamo, but it will not sell you Dublin to Seville as one ticket, and searching its site just tells you there are no flights.
+
+There are flights. They are simply two bookings that nobody is joining up for you. This tool does the joining: it finds airports served from both ends, prices each leg separately across a date range, keeps only the pairs that actually connect in time, and ranks what survives by total cost.
+
+Two surfaces, same engine:
+
+- **CLI** for scripted or repeatable searches, with JSON output for piping.
+- **Web UI** (React + FastAPI) for browsing results as they stream in.
+
+```
+        ┌── discover ──> airports served from BOTH ends
+        │
+DUB ────┤   BGY  BLQ  STN  ...        ← candidate stopovers
+        │
+        └── search ────> price leg 1 + leg 2 per day, keep valid connections
+                              │
+                              ▼
+                    ranked by total price
+```
+
+> [!IMPORTANT]
+> These are **two separately booked one-way flights**, not a protected connection. If the first leg is delayed or cancelled, you have no rebooking rights on the second and no compensation claim for the missed connection. Leave a generous layover and understand you are carrying that risk yourself.
+
+## Contents
+
+- [Disclaimer](#disclaimer)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Web UI](#web-ui)
+- [Command reference](#command-reference)
+- [How it works](#how-it-works)
+- [Caching](#caching)
+- [Development](#development)
+- [License](#license)
 
 ## Disclaimer
 
 This is an independent personal project, built for personal and educational use. It is **not affiliated with, endorsed by, or connected to Ryanair** in any way.
 
-It works by querying Ryanair's undocumented public JSON endpoints, the same ones their website calls. Those endpoints are not a supported API: they can change or disappear without notice, and using them may conflict with Ryanair's Terms of Use. You are responsible for deciding whether your use is appropriate, and for using the tool at a reasonable request volume. The software is provided without warranty of any kind, and the author accepts no liability for how it is used.
+It queries Ryanair's undocumented public JSON endpoints, the same ones their website calls. Those endpoints are not a supported API: they can change or disappear without notice, and using them may conflict with Ryanair's Terms of Use. You are responsible for deciding whether your use is appropriate, and for keeping request volume reasonable. The software is provided without warranty of any kind, and the author accepts no liability for how it is used.
 
-Itineraries found here are **two separately booked one-way flights**, not a protected connection. If the first leg is delayed or cancelled, you have no rebooking rights on the second, and no compensation claim for the missed connection. Leave a generous layover and understand you are carrying that risk yourself.
+## Install
 
-## Installation
-
-Requires Python 3.11+.
+Requires Python 3.11 or newer.
 
 ```bash
-# Clone the repo
 git clone https://github.com/vitofico/ryanair_flight_search.git
 cd ryanair_flight_search
 
-# Install with uv
-uv sync
-
-# Or with pip
+uv sync          # recommended
+# or
 pip install -e .
 ```
 
-## Quick Start
+## Quick start
 
-### 1. Discover connection airports
+### 1. Find the candidate stopovers
 
-Find which airports connect your origin and destination:
+Work out which airports Ryanair serves from **both** your origin and your destination:
 
 ```bash
 ryanair-search discover --origin DUB --destination SVQ
 ```
 
-This saves results to `connections.json` for use by the search command.
+Results are saved to `connections.json`, which `search` picks up automatically.
 
-### 2. Search for flights
+### 2. Search
 
 ```bash
-ryanair-search search --origin DUB --destination SVQ --start 2026-03-01 --end 2026-03-07
+ryanair-search search --origin DUB --destination SVQ \
+    --start 2026-03-01 --end 2026-03-07
+```
+
+```
+========================================================================================================================
+  # | First Leg                      | Connection   | Second Leg                     |      Total |   Duration
+------------------------------------------------------------------------------------------------------------------------
+  1 | DUB->BGY 03/03 06:20-10:05     | BGY (3h 10m) | BGY->SVQ 03/03 13:15-15:40     |  EUR 74.98 |     9h 20m
+  2 | DUB->STN 03/05 09:15-10:45     | STN (3h 20m) | STN->SVQ 03/05 14:05-17:50     |  EUR 81.50 |     8h 35m
+========================================================================================================================
+Total: 2 itineraries
 ```
 
 `--origin` and `--destination` are required on both commands.
 
-The search command will:
-- Load discovered connections from `connections.json`, unless you pass `--connections`
-- Query available dates for each leg
-- Find all valid connecting itineraries
-- Sort results by price, then arrival time
-
 ## Web UI
 
-Run the backend and frontend dev server in two terminals:
-
 ```bash
-# Terminal 1: API server (port 8000)
+# Terminal 1: API on :8000
 uv run ryanair-web
 
-# Terminal 2: Vite dev server (port 5173)
+# Terminal 2: Vite dev server on :5173
 cd frontend && npm run dev
 ```
 
-Open http://localhost:5173.
+Open http://localhost:5173. Progress streams over SSE, so long searches report as they go rather than blocking on a spinner.
 
-For production, build the frontend and serve everything from the backend:
+To run it as one process, build the frontend and let the backend serve it:
 
 ```bash
 cd frontend && npm run build
-uv run ryanair-web
+uv run ryanair-web       # now serves UI + API on :8000
 ```
 
-Then open http://localhost:8000.
+> [!WARNING]
+> **Run this locally only.** The web API has no authentication and no rate limiting, and one search fans out hundreds of outbound requests to Ryanair. Anyone who can reach the port can drive that traffic from your IP address. The CLI binds `127.0.0.1` by default; the Docker image binds `0.0.0.0`, so publish that port only on a trusted host.
 
-> **Run this locally only.** The web API has no authentication and no rate limiting, and a single search fans out hundreds of outbound requests to Ryanair. If you expose the port to a network, anyone who can reach it can drive that traffic from your IP address. The CLI entry point binds to `127.0.0.1` by default; note that the Docker image binds `0.0.0.0` so the container is reachable, so publish that port only on a trusted host.
+## Command reference
 
-## Usage
-
-### `discover` command
+### `discover`
 
 ```bash
 ryanair-search discover --origin DUB --destination SVQ [--no-cache] [--debug]
 ```
 
-Finds airports served by both origin and destination, which can be used as connection points.
+Intersects the destination lists of both airports to produce the candidate stopovers.
 
-### `search` command
+### `search`
 
 ```bash
 ryanair-search search --origin DUB --destination SVQ \
     --start YYYY-MM-DD --end YYYY-MM-DD \
-    [--connections BGY,BLQ] \
-    [--currency EUR] \
-    [--min-connection-minutes 60] \
-    [--max-connection-hours 8] \
-    [--allow-overnight] \
-    [--output table|json] \
+    [--connections BGY,BLQ] [--currency EUR] \
+    [--min-connection-minutes 60] [--max-connection-hours 8] \
+    [--allow-overnight] [--output table|json] \
     [--no-cache] [--debug]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--start` | required | Start of date range |
-| `--end` | required | End of date range |
-| `--origin` | required | Origin airport IATA code |
-| `--destination` | required | Destination airport IATA code |
-| `--connections` | auto | Comma-separated connection airports |
-| `--currency` | EUR | Currency for prices |
-| `--min-connection-minutes` | 60 | Minimum layover time |
-| `--max-connection-hours` | 8 | Maximum layover time |
-| `--allow-overnight` | false | Allow next-day connections |
-| `--output` | table | Output format: `table` or `json` |
-| `--no-cache` | false | Disable response caching |
-| `--debug` | false | Show debug output |
+| `--origin` | **required** | Origin airport IATA code |
+| `--destination` | **required** | Destination airport IATA code |
+| `--start` | **required** | Start of date range |
+| `--end` | **required** | End of date range |
+| `--connections` | auto | Comma-separated stopovers, overriding `connections.json` |
+| `--currency` | `EUR` | Currency for prices |
+| `--min-connection-minutes` | `60` | Shortest acceptable layover |
+| `--max-connection-hours` | `8` | Longest acceptable layover |
+| `--allow-overnight` | `false` | Allow the second leg to depart the next day |
+| `--output` | `table` | `table` for humans, `json` for scripts |
+| `--no-cache` | `false` | Bypass the response cache |
+| `--debug` | `false` | Show debug output |
 
-### Output formats
-
-**Table** (default): Human-readable table to terminal.
-
-**JSON**: Machine-readable output to stdout (progress messages go to stderr), suitable for piping:
+Results go to stdout and progress to stderr, so JSON pipes cleanly:
 
 ```bash
 ryanair-search search --origin DUB --destination SVQ \
     --start 2026-03-01 --end 2026-03-07 --output json > results.json
 ```
 
+## How it works
+
+1. **Route discovery.** Ryanair publishes the destinations served from each airport. Intersecting the origin's list with the destination's gives the airports that could act as a stopover.
+2. **Availability.** For each leg the tool asks which dates actually have service, so it never spends requests pricing empty days.
+3. **Fares.** Each remaining day is priced one request at a time, throttled to stay polite, with responses cached.
+4. **Connection building.** A pair survives only when the second leg departs after the first arrives, inside your layover bounds, same day unless `--allow-overnight`.
+5. **Ranking.** Survivors are sorted by total price, then by arrival time.
+
 ## Caching
 
-API responses are cached in a local SQLite database (`ryanair_cache.db`) for 6 hours to reduce API calls and speed up repeated searches. Use `--no-cache` to bypass.
-
-## Architecture
-
-```
-src/ryanair_flight_search/
-  cli.py          - Command-line interface and argument parsing
-  api_client.py   - Ryanair API client with retries and rate limiting
-  cache.py        - SQLite-based response cache
-  search.py       - Search orchestration
-  itinerary.py    - Itinerary builder and connection validation
-  models.py       - Flight and Itinerary data models
-  output.py       - Table and JSON output formatters
-  exceptions.py   - Domain exception types
-  webapi/         - FastAPI backend for the web UI
-frontend/         - React + Vite frontend
-```
+Responses land in a local SQLite database (`ryanair_cache.db`) with a 6 hour TTL. Repeat searches are near-instant and cost Ryanair nothing. Use `--no-cache` to force fresh data.
 
 ## Development
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
+
 ```bash
-# Install dev dependencies
 uv sync --group dev
+uv run pytest          # 74 tests, 80% coverage floor
+uv run ruff check .    # lint
+uv run ruff format .   # format
+uv run mypy            # strict type check
+```
 
-# Run tests
-uv run pytest
-
-# Lint and format
-uv run ruff check .
-uv run ruff format .
-
-# Type check
-uv run mypy
+```
+src/ryanair_flight_search/
+  cli.py          Command-line interface and argument parsing
+  api_client.py   Ryanair HTTP client with retries and rate limiting
+  cache.py        SQLite response cache
+  search.py       Search orchestration
+  itinerary.py    Itinerary builder and connection validation
+  models.py       Flight and Itinerary data models
+  output.py       Table and JSON formatters
+  exceptions.py   Domain exception types
+  webapi/         FastAPI backend (routers, SSE job manager)
+frontend/         React + Vite frontend
 ```
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).
