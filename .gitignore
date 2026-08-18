@@ -13,3 +13,16 @@ htmlcov/
 .coverage
 frontend/node_modules/
 frontend/dist/
+
+# Local agent / editor state
+.claude/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Secrets (guardrail; nothing tracked)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
