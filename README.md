@@ -40,6 +40,7 @@ DUB ────┤   BGY  BLQ  STN  ...        ← candidate stopovers
 
 - [Disclaimer](#disclaimer)
 - [Install](#install)
+- [Docker](#docker)
 - [Quick start](#quick-start)
 - [Web UI](#web-ui)
 - [Command reference](#command-reference)
@@ -65,6 +66,32 @@ cd ryanair_flight_search
 uv sync          # recommended
 # or
 pip install -e .
+```
+
+## Docker
+
+One command, no Python or Node toolchain required:
+
+```bash
+docker compose up
+```
+
+Open http://127.0.0.1:8080. The image builds the frontend and serves it from the same process as the API, so there is nothing else to start.
+
+The published port is pinned to `127.0.0.1` deliberately. The API has no authentication and no rate limiting, and one search fans out hundreds of requests to Ryanair from your IP address, so loopback keeps that off your local network. Do not widen it to `0.0.0.0` unless you have put something in front of it.
+
+The price cache lives in a named volume mounted at `/data`, which is the container's working directory, so it survives restarts and rebuilds. The container runs as a non-root user and reports health by polling its own `/openapi.json`.
+
+The same image carries the CLI:
+
+```bash
+docker compose run --rm web ryanair-search discover --origin DUB --destination SVQ
+```
+
+Stop and remove the container, keeping the cache:
+
+```bash
+docker compose down
 ```
 
 ## Quick start
@@ -100,6 +127,14 @@ Total: 2 itineraries
 
 ## Web UI
 
+The browser app is the friendly face of the same search the CLI runs. You pick an origin, a destination, a date range and the airports you are willing to connect through, and the results stream in while the search is still running: a progress bar fills as each connection is priced, so you see how far along it is rather than staring at a spinner.
+
+Each result is a card that shows both legs of the journey with the layover marked on the route line between them, so you can scan flight times, the stopover airport and how long you are stuck there at a glance. The total price and total duration sit together at the end of the card. Anything promising can be added to the compare view, which stacks the shortlist side by side, highlights the cheapest and the fastest, and exports the lot as JSON or CSV.
+
+The interface follows your system theme, light or dark, with no toggle to remember. It is built for a phone as much as a laptop, so the form, the progress panel and the result cards all reflow down to narrow screens. Keyboard users get visible focus rings throughout, and motion is disabled if you have asked your system to reduce it.
+
+For development, run the two processes separately:
+
 ```bash
 # Terminal 1: API on :8000
 uv run ryanair-web
@@ -118,7 +153,7 @@ uv run ryanair-web       # now serves UI + API on :8000
 ```
 
 > [!WARNING]
-> **Run this locally only.** The web API has no authentication and no rate limiting, and one search fans out hundreds of outbound requests to Ryanair. Anyone who can reach the port can drive that traffic from your IP address. The CLI binds `127.0.0.1` by default; the Docker image binds `0.0.0.0`, so publish that port only on a trusted host.
+> **Run this locally only.** The web API has no authentication and no rate limiting, and one search fans out hundreds of outbound requests to Ryanair. Anyone who can reach the port can drive that traffic from your IP address. The CLI binds `127.0.0.1` by default, and `docker compose` publishes the port on `127.0.0.1` too. If you change either, put authentication in front of it first.
 
 ## Command reference
 
@@ -186,6 +221,19 @@ uv run ruff check .    # lint
 uv run ruff format .   # format
 uv run mypy            # strict type check
 ```
+
+Or use the Makefile. Run `make` on its own to list every target.
+
+| Target | What it does |
+|--------|--------------|
+| `install` | `uv sync --group dev` |
+| `test` | pytest, 74 tests with an 80% coverage floor |
+| `lint` | `ruff check .` and `ruff format --check .` |
+| `format` | reformat in place |
+| `typecheck` | strict mypy |
+| `check` | lint, typecheck and test, the same set CI runs |
+| `run` | serve the web UI on http://127.0.0.1:8000 |
+| `docker-build` | build the image without starting it |
 
 ```
 src/ryanair_flight_search/
