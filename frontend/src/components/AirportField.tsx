@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useId } from "react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { getAirports, type Airport } from "../api/client";
@@ -28,6 +28,7 @@ export default function AirportField({
   onChange,
   placeholder = "Search city or IATA code",
 }: AirportFieldProps) {
+  const inputId = useId();
   const [inputValue, setInputValue] = useState(value);
   const [open, setOpen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -138,8 +139,11 @@ export default function AirportField({
 
   return (
     <div className="field airport-field" ref={wrapperRef}>
-      <label className="field-label">{label}</label>
+      <label className="field-label" htmlFor={inputId}>
+        {label}
+      </label>
       <input
+        id={inputId}
         type="text"
         className={clsx("field-input", showError && "field-input--error")}
         value={inputValue}

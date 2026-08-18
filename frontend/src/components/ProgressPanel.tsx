@@ -12,22 +12,42 @@ export default function ProgressPanel({
   const pct = progress ? Math.round((progress.current / progress.total) * 100) : 0;
 
   return (
-    <div className="progress-panel">
-      <h2>Searching flights...</h2>
-      <div className="progress-bar-track">
-        <div
-          className="progress-bar-fill"
-          style={{ width: `${pct}%` }}
-        />
+    <section className="progress-panel" aria-busy="true">
+      <div className="progress-head">
+        <h2 className="progress-title">
+          <span className="progress-dot" aria-hidden="true" />
+          Searching flights...
+        </h2>
+        <span className="progress-percent">{pct}%</span>
       </div>
-      {progress ? (
-        <p className="progress-label">{progress.message}</p>
-      ) : (
-        <p className="progress-label">Starting search...</p>
-      )}
+
+      <div
+        className="progress-bar-track"
+        role="progressbar"
+        aria-label="Search progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      >
+        <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+      </div>
+
+      <div className="progress-meta" aria-live="polite">
+        {progress ? (
+          <p className="progress-message">{progress.message}</p>
+        ) : (
+          <p className="progress-message">Starting search...</p>
+        )}
+        {progress && (
+          <span className="progress-count">
+            {progress.current} / {progress.total}
+          </span>
+        )}
+      </div>
+
       <button className="btn btn-secondary" onClick={onCancel}>
         Cancel
       </button>
-    </div>
+    </section>
   );
 }

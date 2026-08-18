@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { discoverConnections } from "../api/client";
 import clsx from "clsx";
@@ -16,6 +16,7 @@ export default function ConnectionsPanel({
   origin,
   destination,
 }: ConnectionsPanelProps) {
+  const inputId = useId();
   const [discoverError, setDiscoverError] = useState<string | null>(null);
 
   const discover = useMutation({
@@ -35,9 +36,12 @@ export default function ConnectionsPanel({
 
   return (
     <div className="field">
-      <label className="field-label">Connection Airports</label>
+      <label className="field-label" htmlFor={inputId}>
+        Connection Airports
+      </label>
       <div className="connections-row">
         <input
+          id={inputId}
           type="text"
           className="field-input"
           value={value}

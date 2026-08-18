@@ -128,8 +128,10 @@ export default function SearchPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Ryanair Flight Search</h1>
-        <p>Find connecting flights at the best prices</p>
+        <div className="page-header-inner">
+          <h1>Ryanair Flight Search</h1>
+          <p>Find connecting flights at the best prices</p>
+        </div>
       </header>
 
       <main className="page-main">

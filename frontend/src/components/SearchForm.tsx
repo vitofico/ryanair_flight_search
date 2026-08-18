@@ -73,47 +73,52 @@ export default function SearchForm({ onSearch, initialParams }: SearchFormProps)
 
   return (
     <form className="search-form" onSubmit={handleSubmit}>
-      <div className="field-row">
-        <AirportField
-          label="Origin"
-          value={origin}
-          onChange={setOrigin}
-          placeholder="e.g. CRV"
+      <div className="search-form-body">
+        <div className="field-row field-row--route">
+          <AirportField
+            label="Origin"
+            value={origin}
+            onChange={setOrigin}
+            placeholder="e.g. CRV"
+          />
+          <span className="route-arrow" aria-hidden="true">
+            &rarr;
+          </span>
+          <AirportField
+            label="Destination"
+            value={destination}
+            onChange={setDestination}
+            placeholder="e.g. SVQ"
+          />
+        </div>
+
+        <DateRangeField
+          start={start}
+          end={end}
+          onStartChange={setStart}
+          onEndChange={setEnd}
         />
-        <AirportField
-          label="Destination"
-          value={destination}
-          onChange={setDestination}
-          placeholder="e.g. SVQ"
+
+        <ConnectionsPanel
+          value={connectionsRaw}
+          onChange={setConnectionsRaw}
+          origin={origin}
+          destination={destination}
+        />
+
+        <AdvancedOptions
+          currency={currency}
+          onCurrencyChange={setCurrency}
+          minConnectionMinutes={minConnectionMinutes}
+          onMinConnectionMinutesChange={setMinConnectionMinutes}
+          maxConnectionHours={maxConnectionHours}
+          onMaxConnectionHoursChange={setMaxConnectionHours}
+          allowOvernight={allowOvernight}
+          onAllowOvernightChange={setAllowOvernight}
         />
       </div>
 
-      <DateRangeField
-        start={start}
-        end={end}
-        onStartChange={setStart}
-        onEndChange={setEnd}
-      />
-
-      <ConnectionsPanel
-        value={connectionsRaw}
-        onChange={setConnectionsRaw}
-        origin={origin}
-        destination={destination}
-      />
-
-      <AdvancedOptions
-        currency={currency}
-        onCurrencyChange={setCurrency}
-        minConnectionMinutes={minConnectionMinutes}
-        onMinConnectionMinutesChange={setMinConnectionMinutes}
-        maxConnectionHours={maxConnectionHours}
-        onMaxConnectionHoursChange={setMaxConnectionHours}
-        allowOvernight={allowOvernight}
-        onAllowOvernightChange={setAllowOvernight}
-      />
-
-      <div className="search-submit-row">
+      <div className="search-form-footer">
         <label className="checkbox-label">
           <input
             type="checkbox"

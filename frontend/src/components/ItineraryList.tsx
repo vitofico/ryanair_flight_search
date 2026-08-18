@@ -50,15 +50,17 @@ export default function ItineraryList({ result }: ItineraryListProps) {
         </span>
         <div className="results-actions">
           <label className="sort-label">
-            Sort by:{" "}
-            <select
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-            >
-              <option value="price">Price</option>
-              <option value="duration">Duration</option>
-              <option value="layover">Layover</option>
-            </select>
+            Sort by:
+            <span className="select-wrap">
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+              >
+                <option value="price">Price</option>
+                <option value="duration">Duration</option>
+                <option value="layover">Layover</option>
+              </select>
+            </span>
           </label>
           <button
             className="btn btn-secondary"

@@ -1,3 +1,4 @@
+import { useId } from "react";
 import clsx from "clsx";
 
 interface DateRangeFieldProps {
@@ -13,13 +14,18 @@ export default function DateRangeField({
   onStartChange,
   onEndChange,
 }: DateRangeFieldProps) {
+  const startId = useId();
+  const endId = useId();
   const invalid = start && end && start > end;
 
   return (
     <div className="field-row">
       <div className="field">
-        <label className="field-label">Start Date</label>
+        <label className="field-label" htmlFor={startId}>
+          Start Date
+        </label>
         <input
+          id={startId}
           type="date"
           className="field-input"
           value={start}
@@ -27,8 +33,11 @@ export default function DateRangeField({
         />
       </div>
       <div className="field">
-        <label className="field-label">End Date</label>
+        <label className="field-label" htmlFor={endId}>
+          End Date
+        </label>
         <input
+          id={endId}
           type="date"
           className={clsx("field-input", invalid && "field-input--error")}
           value={end}

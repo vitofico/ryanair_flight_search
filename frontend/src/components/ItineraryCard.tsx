@@ -33,19 +33,19 @@ export default function ItineraryCard({
   const selected = has(itinerary);
 
   return (
-    <div className={clsx("itinerary-card", selected && "itinerary-card--selected")}>
-      <div className="itinerary-legs">
+    <article className={clsx("itinerary-card", selected && "itinerary-card--selected")}>
+      <div className="itinerary-journey">
         <div className="leg">
           <div className="leg-route">
             <span className="leg-airport">{first_leg.origin}</span>
-            <span className="leg-arrow">&rarr;</span>
+            <span className="leg-arrow" aria-hidden="true">&rarr;</span>
             <span className="leg-airport">{first_leg.destination}</span>
           </div>
           <div className="leg-times">
-            <span>{formatTime(first_leg.departure_datetime)}</span>
+            <span className="leg-time">{formatTime(first_leg.departure_datetime)}</span>
+            <span className="leg-sep" aria-hidden="true">&ndash;</span>
+            <span className="leg-time">{formatTime(first_leg.arrival_datetime)}</span>
             <span className="leg-date">{formatDate(first_leg.departure_datetime)}</span>
-            <span className="leg-sep">-</span>
-            <span>{formatTime(first_leg.arrival_datetime)}</span>
           </div>
           <div className="leg-meta">
             <span className="leg-flight">{first_leg.flight_number}</span>
@@ -53,22 +53,24 @@ export default function ItineraryCard({
           </div>
         </div>
 
-        <div className="connection-badge">
-          <span className="connection-code">{connection_airport}</span>
-          <span className="connection-time">{formatDuration(connection_minutes)}</span>
+        <div className="itinerary-connection">
+          <span className="connection-badge">
+            <span className="connection-code">{connection_airport}</span>
+            <span className="connection-time">{formatDuration(connection_minutes)}</span>
+          </span>
         </div>
 
         <div className="leg">
           <div className="leg-route">
             <span className="leg-airport">{second_leg.origin}</span>
-            <span className="leg-arrow">&rarr;</span>
+            <span className="leg-arrow" aria-hidden="true">&rarr;</span>
             <span className="leg-airport">{second_leg.destination}</span>
           </div>
           <div className="leg-times">
-            <span>{formatTime(second_leg.departure_datetime)}</span>
+            <span className="leg-time">{formatTime(second_leg.departure_datetime)}</span>
+            <span className="leg-sep" aria-hidden="true">&ndash;</span>
+            <span className="leg-time">{formatTime(second_leg.arrival_datetime)}</span>
             <span className="leg-date">{formatDate(second_leg.departure_datetime)}</span>
-            <span className="leg-sep">-</span>
-            <span>{formatTime(second_leg.arrival_datetime)}</span>
           </div>
           <div className="leg-meta">
             <span className="leg-flight">{second_leg.flight_number}</span>
@@ -78,11 +80,17 @@ export default function ItineraryCard({
       </div>
 
       <div className="itinerary-summary">
-        <span className="itinerary-total-price">
-          {first_leg.currency} {total_price}
+        <span className="itinerary-stat">
+          <span className="itinerary-stat-label">Total</span>
+          <span className="itinerary-total-price">
+            {first_leg.currency} {total_price}
+          </span>
         </span>
-        <span className="itinerary-duration">
-          {formatDuration(total_duration_minutes)}
+        <span className="itinerary-stat">
+          <span className="itinerary-stat-label">Duration</span>
+          <span className="itinerary-duration">
+            {formatDuration(total_duration_minutes)}
+          </span>
         </span>
         {showCompare && (
           <button
@@ -103,6 +111,6 @@ export default function ItineraryCard({
           </button>
         )}
       </div>
-    </div>
+    </article>
   );
 }

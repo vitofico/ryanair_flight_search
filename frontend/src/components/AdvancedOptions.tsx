@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useId, useState } from "react";
+import clsx from "clsx";
 
 interface AdvancedOptionsProps {
   currency: string;
@@ -22,6 +23,10 @@ export default function AdvancedOptions({
   onAllowOvernightChange,
 }: AdvancedOptionsProps) {
   const [open, setOpen] = useState(false);
+  const bodyId = useId();
+  const currencyId = useId();
+  const minId = useId();
+  const maxId = useId();
 
   return (
     <div className="advanced-options">
@@ -29,15 +34,24 @@ export default function AdvancedOptions({
         type="button"
         className="advanced-toggle"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={bodyId}
       >
         {open ? "Hide" : "Show"} Advanced Options
+        <span
+          className={clsx("advanced-chevron", open && "advanced-chevron--open")}
+          aria-hidden="true"
+        />
       </button>
       {open && (
-        <div className="advanced-body">
-          <div className="field-row">
+        <div className="advanced-body" id={bodyId}>
+          <div className="field-row field-row--triple">
             <div className="field">
-              <label className="field-label">Currency</label>
+              <label className="field-label" htmlFor={currencyId}>
+                Currency
+              </label>
               <input
+                id={currencyId}
                 type="text"
                 className="field-input"
                 value={currency}
@@ -46,8 +60,11 @@ export default function AdvancedOptions({
               />
             </div>
             <div className="field">
-              <label className="field-label">Min Connection (min)</label>
+              <label className="field-label" htmlFor={minId}>
+                Min Connection (min)
+              </label>
               <input
+                id={minId}
                 type="number"
                 className="field-input"
                 value={minConnectionMinutes}
@@ -58,8 +75,11 @@ export default function AdvancedOptions({
               />
             </div>
             <div className="field">
-              <label className="field-label">Max Connection (hrs)</label>
+              <label className="field-label" htmlFor={maxId}>
+                Max Connection (hrs)
+              </label>
               <input
+                id={maxId}
                 type="number"
                 className="field-input"
                 value={maxConnectionHours}

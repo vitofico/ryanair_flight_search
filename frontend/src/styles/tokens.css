@@ -1,0 +1,126 @@
+/*
+ * Design tokens.
+ *
+ * Light values are declared on :root. The dark block below re-declares only
+ * colour tokens, so every colour always has a light definition to fall back to.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-wide: 0.06em;
+  --tracking-tight: -0.015em;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-full: 999px;
+
+  /* Layout */
+  --width-content: 52rem;
+  --width-wide: 60rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --transition-fast: 120ms var(--ease-out);
+  --transition-base: 200ms var(--ease-out);
+
+  /* Colour: light */
+  --c-bg: #f3f5f8;
+  --c-surface: #ffffff;
+  --c-surface-muted: #f6f8fb;
+  --c-surface-hover: #eef2f7;
+  --c-border: #e3e8ee;
+  --c-border-strong: #cfd7e1;
+
+  --c-text: #101620;
+  --c-text-muted: #55606d;
+  --c-text-faint: #6b7683;
+
+  --c-accent: #1b5fd6;
+  --c-accent-hover: #164fb4;
+  --c-accent-text: #1450b8;
+  --c-accent-soft: #eaf1fe;
+  --c-accent-soft-hover: #dde8fd;
+  --c-on-accent: #ffffff;
+
+  --c-danger: #c62828;
+  --c-danger-hover: #a51f1f;
+  --c-danger-text: #b3261e;
+  --c-danger-soft: #fdecec;
+
+  --c-focus: #1b5fd6;
+  --c-focus-ring: rgba(27, 95, 214, 0.22);
+
+  --shadow-sm: 0 1px 2px rgba(16, 22, 32, 0.06);
+  --shadow-md: 0 1px 2px rgba(16, 22, 32, 0.05),
+    0 6px 16px -6px rgba(16, 22, 32, 0.14);
+  --shadow-lg: 0 2px 4px rgba(16, 22, 32, 0.06),
+    0 16px 32px -12px rgba(16, 22, 32, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #0c1016;
+    --c-surface: #141a22;
+    --c-surface-muted: #1a212b;
+    --c-surface-hover: #202834;
+    --c-border: #232c38;
+    --c-border-strong: #35414f;
+
+    --c-text: #e8edf4;
+    --c-text-muted: #9ba7b6;
+    --c-text-faint: #7d8998;
+
+    --c-accent: #2563d9;
+    --c-accent-hover: #2f70ec;
+    --c-accent-text: #7fabff;
+    --c-accent-soft: #16233a;
+    --c-accent-soft-hover: #1c2c48;
+    --c-on-accent: #ffffff;
+
+    --c-danger: #b42d24;
+    --c-danger-hover: #cd382e;
+    --c-danger-text: #ff9a94;
+    --c-danger-soft: #2a1618;
+
+    --c-focus: #7fabff;
+    --c-focus-ring: rgba(127, 171, 255, 0.3);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.35),
+      0 6px 16px -6px rgba(0, 0, 0, 0.55);
+    --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.4),
+      0 16px 32px -12px rgba(0, 0, 0, 0.65);
+  }
+}

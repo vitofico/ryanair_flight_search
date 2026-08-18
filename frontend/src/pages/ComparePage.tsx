@@ -112,17 +112,19 @@ export default function ComparePage() {
   }, [items]);
 
   return (
-    <div className="page">
+    <div className="page page--wide">
       <header className="page-header">
-        <h1>Compare Flights</h1>
-        <p>
-          {items.length === 0
-            ? "No flights selected"
-            : `${items.length} flight${items.length === 1 ? "" : "s"} selected`}
-        </p>
+        <div className="page-header-inner">
+          <h1>Compare Flights</h1>
+          <p>
+            {items.length === 0
+              ? "No flights selected"
+              : `${items.length} flight${items.length === 1 ? "" : "s"} selected`}
+          </p>
+        </div>
       </header>
 
-      <main className="page-main compare-main">
+      <main className="page-main">
         <div className="compare-nav">
           <a href="#/" className="btn btn-secondary">Back to Search</a>
         </div>
@@ -167,13 +169,15 @@ export default function ComparePage() {
             {/* Toolbar */}
             <div className="results-toolbar">
               <label className="sort-label">
-                Sort by:{" "}
-                <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
-                  <option value="price">Price</option>
-                  <option value="duration">Duration</option>
-                  <option value="layover">Layover</option>
-                  <option value="departure">Departure</option>
-                </select>
+                Sort by:
+                <span className="select-wrap">
+                  <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
+                    <option value="price">Price</option>
+                    <option value="duration">Duration</option>
+                    <option value="layover">Layover</option>
+                    <option value="departure">Departure</option>
+                  </select>
+                </span>
               </label>
               <div className="results-actions">
                 <button className="btn btn-secondary" onClick={() => exportJson(items)}>
