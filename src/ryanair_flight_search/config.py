@@ -14,8 +14,7 @@ REQUEST_TIMEOUT_SECONDS = 30
 RATE_LIMIT_DELAY_SECONDS = 0.5
 
 # -- Route defaults --
-DEFAULT_ORIGIN = ""
-DEFAULT_DESTINATION = ""
+# Origin and destination are required CLI arguments; there are no defaults.
 DEFAULT_CONNECTIONS: list[str] | None = None
 DEFAULT_CURRENCY = "EUR"
 

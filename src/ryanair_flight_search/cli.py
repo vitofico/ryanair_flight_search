@@ -14,10 +14,8 @@ from .config import (
     CONNECTIONS_FILENAME,
     DEFAULT_CONNECTIONS,
     DEFAULT_CURRENCY,
-    DEFAULT_DESTINATION,
     DEFAULT_MAX_CONNECTION_HOURS,
     DEFAULT_MIN_CONNECTION_MINUTES,
-    DEFAULT_ORIGIN,
 )
 from .exceptions import APIError
 from .output import output_json, output_table
@@ -168,13 +166,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     discover_parser.add_argument(
         "--origin",
-        default=DEFAULT_ORIGIN,
-        help=f"Origin airport IATA code (default: {DEFAULT_ORIGIN})",
+        required=True,
+        help="Origin airport IATA code (e.g. DUB)",
     )
     discover_parser.add_argument(
         "--destination",
-        default=DEFAULT_DESTINATION,
-        help=f"Destination airport IATA code (default: {DEFAULT_DESTINATION})",
+        required=True,
+        help="Destination airport IATA code (e.g. SVQ)",
     )
     discover_parser.add_argument(
         "--no-cache", action="store_true", help="Disable API response caching"
@@ -188,18 +186,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     search_parser.add_argument(
         "--origin",
-        default=DEFAULT_ORIGIN,
-        help=f"Origin airport IATA code (default: {DEFAULT_ORIGIN})",
+        required=True,
+        help="Origin airport IATA code (e.g. DUB)",
     )
     search_parser.add_argument(
         "--connections",
         default=None,
-        help="Comma-separated connection airports (default: auto-load or built-in fallback)",
+        help="Comma-separated connection airports (default: auto-load from connections.json)",
     )
     search_parser.add_argument(
         "--destination",
-        default=DEFAULT_DESTINATION,
-        help=f"Destination airport IATA code (default: {DEFAULT_DESTINATION})",
+        required=True,
+        help="Destination airport IATA code (e.g. SVQ)",
     )
     search_parser.add_argument("--start", required=True, help="Start date (YYYY-MM-DD)")
     search_parser.add_argument("--end", required=True, help="End date (YYYY-MM-DD)")

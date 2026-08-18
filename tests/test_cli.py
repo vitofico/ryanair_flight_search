@@ -17,21 +17,38 @@ from ryanair_flight_search.cli import (
 
 
 class TestParseArgs:
-    def test_discover_defaults(self):
-        args = parse_args(["discover"])
-        assert args.command == "discover"
-        assert args.origin == ""
-        assert args.destination == ""
-        assert args.debug is False
+    def test_discover_requires_origin_and_destination(self):
+        with pytest.raises(SystemExit):
+            parse_args(["discover"])
 
     def test_discover_custom(self):
         args = parse_args(["discover", "--origin", "STN", "--destination", "MAD"])
+        assert args.command == "discover"
         assert args.origin == "STN"
         assert args.destination == "MAD"
+        assert args.debug is False
+
+    def test_search_requires_origin_and_destination(self):
+        with pytest.raises(SystemExit):
+            parse_args(["search", "--start", "2026-03-01", "--end", "2026-03-07"])
 
     def test_search_required_args(self):
-        args = parse_args(["search", "--start", "2026-03-01", "--end", "2026-03-07"])
+        args = parse_args(
+            [
+                "search",
+                "--origin",
+                "STN",
+                "--destination",
+                "MAD",
+                "--start",
+                "2026-03-01",
+                "--end",
+                "2026-03-07",
+            ]
+        )
         assert args.command == "search"
+        assert args.origin == "STN"
+        assert args.destination == "MAD"
         assert args.start == "2026-03-01"
         assert args.end == "2026-03-07"
 
@@ -141,18 +158,42 @@ class TestBuildCache:
 class TestMain:
     def test_main_discover(self, monkeypatch):
         with patch("ryanair_flight_search.cli.cmd_discover") as mock:
-            main(["discover"])
+            main(["discover", "--origin", "STN", "--destination", "MAD"])
             mock.assert_called_once()
 
     def test_main_search(self, monkeypatch):
         with patch("ryanair_flight_search.cli.cmd_search") as mock:
-            main(["search", "--start", "2026-03-01", "--end", "2026-03-07"])
+            main(
+                [
+                    "search",
+                    "--origin",
+                    "STN",
+                    "--destination",
+                    "MAD",
+                    "--start",
+                    "2026-03-01",
+                    "--end",
+                    "2026-03-07",
+                ]
+            )
             mock.assert_called_once()
 
 
 class TestCmdSearch:
     def test_start_after_end_exits(self):
-        args = parse_args(["search", "--start", "2026-03-10", "--end", "2026-03-01"])
+        args = parse_args(
+            [
+                "search",
+                "--origin",
+                "STN",
+                "--destination",
+                "MAD",
+                "--start",
+                "2026-03-10",
+                "--end",
+                "2026-03-01",
+            ]
+        )
         with pytest.raises(SystemExit):
             cmd_search(args)
 
@@ -162,6 +203,10 @@ class TestCmdSearch:
             args = parse_args(
                 [
                     "search",
+                    "--origin",
+                    "STN",
+                    "--destination",
+                    "MAD",
                     "--start",
                     "2026-03-10",
                     "--end",
