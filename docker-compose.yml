@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    image: ryanair-flight-search:latest
+    # Bound to the loopback interface on purpose. The API has no authentication
+    # and no rate limiting, and a single search fans out hundreds of requests to
+    # Ryanair from this machine's IP address. Publishing on 0.0.0.0 would hand
+    # that to anyone on the same network, so keep the host side at 127.0.0.1.
+    ports:
+      - "127.0.0.1:8080:8080"
+    # The SQLite price cache lives in the container working directory, so the
+    # volume mounts there and survives restarts and rebuilds.
+    volumes:
+      - ryanair-cache:/data
+    restart: unless-stopped
+    healthcheck:
+      # /openapi.json is served by the app itself and touches no upstream API.
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen("http://127.0.0.1:8080/openapi.json", timeout=5)
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  ryanair-cache:

@@ -1,19 +1,34 @@
-.venv/
+# Version control and CI
 .git/
 .github/
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-__pycache__/
-*.pyc
-tests/
+
+# Python environments, build output and caches
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.egg-info/
+**/.mypy_cache/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.coverage
 htmlcov/
-.coverage
-ryanair_cache.db
+
+# Frontend: node_modules is reinstalled in the build stage, dist is rebuilt
+**/node_modules/
+**/dist/
+**/*.tsbuildinfo
+
+# Local runtime state, never baked into the image
+**/*.db
 connections.json
-.DS_Store
-dist/
-*.egg-info/
+
+# Not needed at runtime
+tests/
 .pre-commit-config.yaml
 CONTRIBUTING.md
 .claude/
+.DS_Store
+
+# Secrets guardrail
+.env
+.env.*
