@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/your-username/ryanair-flight-search.git
-cd ryanair-flight-search
+git clone https://github.com/vitofico/ryanair_flight_search.git
+cd ryanair_flight_search
 uv sync --group dev
 ```
 
