@@ -27,11 +27,15 @@ def _find_frontend_dist() -> Path | None:
 
 app = FastAPI(title="Ryanair Flight Search", version="0.1.0")
 
+# The API is unauthenticated and holds no per-user state, so it needs no
+# credentialed cross-origin access. Wildcard origins combined with
+# allow_credentials=True would make Starlette echo any caller's Origin back,
+# letting any page the user visits read this API's responses.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
