@@ -59,15 +59,21 @@ uv run mypy                # strict mode, no untyped defs
 
 ## Commit messages
 
-Conventional commits, with an optional gitmoji after the type:
+Gitmoji + conventional commits. The emoji goes after the type, before the colon-space:
 
 ```
-feat(search): add --allow-overnight for next-day connections
-fix(api): 🐛 handle 429 without retrying past the backoff budget
-docs: correct the layover defaults in the command table
-test(itinerary): cover the same-airport rejection path
-chore: bump ruff to 0.9
+:sparkles: feat(search): add --allow-overnight for next-day connections
+:bug: fix(api): handle 429 without retrying past the backoff budget
+:memo: docs: correct the layover defaults in the command table
+:white_check_mark: test(itinerary): cover the same-airport rejection path
+:construction_worker: ci: pin actions to commit SHAs
+:wrench: chore: bump ruff to 0.9
 ```
+
+Common gitmoji here: `:sparkles:` (feat), `:bug:` (fix), `:memo:` (docs),
+`:white_check_mark:` (tests), `:construction_worker:` (CI), `:wrench:` (chore),
+`:art:` (refactor/style), `:fire:` (removals), `:lock:` (security),
+`:page_facing_up:` (legal/license), `:whale:` (Docker).
 
 Types in use: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `ci`, `build`, `style`.
 
