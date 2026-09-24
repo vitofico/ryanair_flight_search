@@ -201,8 +201,8 @@ ryanair-search search --origin DUB --destination SVQ \
 ## How it works
 
 1. **Route discovery.** Ryanair publishes the destinations served from each airport. Intersecting the origin's list with the destination's gives the airports that could act as a stopover.
-2. **Availability.** For each leg the tool asks which dates actually have service, so it never spends requests pricing empty days.
-3. **Fares.** Each remaining day is priced one request at a time, throttled to stay polite, with responses cached.
+2. **Schedule.** For each leg the tool reads Ryanair's monthly timetable, which lists every scheduled flight on every day, so it never spends requests pricing empty days.
+3. **Fares.** Each scheduled flight is priced on its own, throttled to stay polite, with responses cached. Ryanair's fare endpoint only ever returns the cheapest fare matching a query, so pricing a whole day at once would hide every flight but one.
 4. **Connection building.** A pair survives only when the second leg departs after the first arrives, inside your layover bounds, same day unless `--allow-overnight`.
 5. **Ranking.** Survivors are sorted by total price, then by arrival time.
 

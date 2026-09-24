@@ -106,6 +106,78 @@ class TestParseFarfndFares:
         assert len(flights) == 0
 
 
+def _fare(departure: str, arrival: str, number: str, price: float) -> dict:
+    return {
+        "outbound": {
+            "departureAirport": {"iataCode": "BGY"},
+            "arrivalAirport": {"iataCode": "SVQ"},
+            "departureDate": departure,
+            "arrivalDate": arrival,
+            "flightNumber": number,
+            "price": {"value": price, "currencyCode": "EUR"},
+        }
+    }
+
+
+class TestGetFlights:
+    def test_returns_every_scheduled_flight_not_just_the_cheapest(self):
+        """farfnd answers any query with its single cheapest fare, so each
+        scheduled departure has to be priced on its own."""
+        timetable = {
+            "month": 11,
+            "days": [
+                {
+                    "day": 1,
+                    "flights": [
+                        {"number": "76", "departureTime": "06:00", "arrivalTime": "08:35"},
+                        {"number": "1296", "departureTime": "15:30", "arrivalTime": "18:05"},
+                    ],
+                },
+                {
+                    "day": 3,
+                    "flights": [
+                        {"number": "76", "departureTime": "06:00", "arrivalTime": "08:35"},
+                    ],
+                },
+            ],
+        }
+        fares = {
+            ("2026-11-01", "06:00"): _fare(
+                "2026-11-01T06:00:00", "2026-11-01T08:35:00", "FR76", 22.52
+            ),
+            ("2026-11-01", "15:30"): _fare(
+                "2026-11-01T15:30:00", "2026-11-01T18:05:00", "FR1296", 38.66
+            ),
+        }
+
+        def fake_get(url, params=None):
+            if "/timtbl/" in url:
+                assert url.endswith("/schedules/BGY/SVQ/years/2026/months/11")
+                return timetable
+            window = params["outboundDepartureTimeFrom"]
+            assert params["outboundDepartureTimeTo"] == window
+            assert params["outboundDepartureDateFrom"] == params["outboundDepartureDateTo"]
+            fare = fares.get((params["outboundDepartureDateFrom"], window))
+            return {"fares": [fare] if fare else []}
+
+        client = RyanairAPIClient()
+        with patch.object(client, "_get", side_effect=fake_get):
+            flights = client.get_flights("BGY", "SVQ", date(2026, 11, 1), date(2026, 11, 2))
+
+        assert [(f.flight_number, f.departure_datetime) for f in flights] == [
+            ("FR76", datetime(2026, 11, 1, 6, 0)),
+            ("FR1296", datetime(2026, 11, 1, 15, 30)),
+        ]
+
+    def test_reads_every_month_the_range_spans(self):
+        client = RyanairAPIClient()
+        with patch.object(client, "_get", return_value={"days": []}) as get:
+            client.get_flights("CRV", "BGY", date(2026, 12, 20), date(2027, 1, 10))
+
+        urls = [c.args[0] for c in get.call_args_list]
+        assert [u.rsplit("/years/", 1)[1] for u in urls] == ["2026/months/12", "2027/months/1"]
+
+
 class TestAPIClientErrors:
     def test_get_available_dates_404_returns_empty(self):
         client = RyanairAPIClient()
