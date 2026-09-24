@@ -7,6 +7,11 @@ from datetime import datetime
 from decimal import Decimal
 
 
+def _money(value: Decimal | None) -> str | None:
+    """Serialize a fare with exactly two decimals, as the CLI prints it ("20.10", not "20.1")."""
+    return str(value.quantize(Decimal("0.01"))) if value is not None else None
+
+
 @dataclass
 class Flight:
     """Represents a single flight leg."""
@@ -26,7 +31,7 @@ class Flight:
             "flight_number": self.flight_number,
             "departure_datetime": self.departure_datetime.isoformat(),
             "arrival_datetime": self.arrival_datetime.isoformat(),
-            "price": str(self.price) if self.price is not None else None,
+            "price": _money(self.price),
             "currency": self.currency,
         }
 
@@ -48,7 +53,7 @@ class Itinerary:
             "second_leg": self.second_leg.to_dict(),
             "connection_airport": self.connection_airport,
             "connection_minutes": self.connection_minutes,
-            "total_price": str(self.total_price) if self.total_price is not None else None,
+            "total_price": _money(self.total_price),
             "total_duration_minutes": self.total_duration_minutes,
         }
 

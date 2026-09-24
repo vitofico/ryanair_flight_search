@@ -16,6 +16,10 @@ class TestFlight:
         assert d["price"] == "29.99"
         assert d["currency"] == "EUR"
 
+    def test_to_dict_price_keeps_two_decimals(self, sample_flight_a):
+        sample_flight_a.price = Decimal("20.1")
+        assert sample_flight_a.to_dict()["price"] == "20.10"
+
     def test_to_dict_none_price(self, sample_flight_no_price):
         d = sample_flight_no_price.to_dict()
         assert d["price"] is None

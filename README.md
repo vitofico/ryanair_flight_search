@@ -11,6 +11,10 @@
   <img src="https://img.shields.io/badge/python-3.11%2B-blue.svg" alt="Python 3.11+">
 </p>
 
+<p align="center">
+  <img src="docs/assets/web-ui.gif" width="800" alt="The web UI searching Dublin to Seville: the form is filled in, a progress bar runs through eight connection airports, and ranked two-flight itineraries appear, cheapest first at EUR 73.98 via Palma.">
+</p>
+
 ## What it is
 
 Say you want to get from Dublin to Seville. Ryanair flies both routes through Milan Bergamo, but it will not sell you Dublin to Seville as one ticket, and searching its site just tells you there are no flights.
@@ -20,7 +24,7 @@ There are flights. They are simply two bookings that nobody is joining up for yo
 Two surfaces, same engine:
 
 - **CLI** for scripted or repeatable searches, with JSON output for piping.
-- **Web UI** (React + FastAPI) for browsing results as they stream in.
+- **Web UI** (React + FastAPI) for browsing and comparing results, with live search progress.
 
 ```
         ┌── discover ──> airports served from BOTH ends
@@ -127,9 +131,13 @@ Total: 2 itineraries
 
 ## Web UI
 
-The browser app is the friendly face of the same search the CLI runs. You pick an origin, a destination, a date range and the airports you are willing to connect through, and the results stream in while the search is still running: a progress bar fills as each connection is priced, so you see how far along it is rather than staring at a spinner.
+The browser app is the friendly face of the same search the CLI runs. You pick an origin, a destination, a date range and the airports you are willing to connect through, and progress streams in while the search runs: a progress bar fills as each connection airport is priced, so you see how far along it is rather than staring at a spinner. The ranked results appear when the search finishes.
 
 Each result is a card that shows both legs of the journey with the layover marked on the route line between them, so you can scan flight times, the stopover airport and how long you are stuck there at a glance. The total price and total duration sit together at the end of the card. Anything promising can be added to the compare view, which stacks the shortlist side by side, highlights the cheapest and the fastest, and exports the lot as JSON or CSV.
+
+<p align="center">
+  <img src="docs/assets/results.png" width="700" alt="Results for Dublin to Seville: 30 itineraries sorted by price, each card showing both flights, the stopover airport with the layover length, the total price and the total duration.">
+</p>
 
 The interface follows your system theme, light or dark, with no toggle to remember. It is built for a phone as much as a laptop, so the form, the progress panel and the result cards all reflow down to narrow screens. Keyboard users get visible focus rings throughout, and motion is disabled if you have asked your system to reduce it.
 
