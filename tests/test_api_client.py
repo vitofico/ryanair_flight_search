@@ -4,8 +4,6 @@ from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
-import pytest
-
 from ryanair_flight_search.api_client import RyanairAPIClient, parse_datetime
 from ryanair_flight_search.exceptions import APIError
 
@@ -179,20 +177,6 @@ class TestGetFlights:
 
 
 class TestAPIClientErrors:
-    def test_get_available_dates_404_returns_empty(self):
-        client = RyanairAPIClient()
-        with patch.object(client, "_get", side_effect=APIError("Not found", status_code=404)):
-            result = client.get_available_dates("XXX", "YYY")
-            assert result == []
-
-    def test_get_available_dates_500_raises(self):
-        client = RyanairAPIClient()
-        with (
-            patch.object(client, "_get", side_effect=APIError("Server error", status_code=500)),
-            pytest.raises(APIError),
-        ):
-            client.get_available_dates("CRV", "BGY")
-
     def test_get_destinations_404_returns_empty(self):
         client = RyanairAPIClient()
         with patch.object(client, "_get", side_effect=APIError("Not found", status_code=404)):
