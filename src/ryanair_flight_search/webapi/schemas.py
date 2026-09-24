@@ -28,7 +28,7 @@ class SearchRequest(BaseModel):
     end: date
     currency: str = "EUR"
     min_connection_minutes: int = 60
-    max_connection_hours: int = 8
+    max_connection_hours: int = 12
     allow_overnight: bool = False
     no_cache: bool = False
 

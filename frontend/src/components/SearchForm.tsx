@@ -27,7 +27,7 @@ export default function SearchForm({ onSearch, initialParams }: SearchFormProps)
   const [connectionsRaw, setConnectionsRaw] = useState("");
   const [currency, setCurrency] = useState("EUR");
   const [minConnectionMinutes, setMinConnectionMinutes] = useState(60);
-  const [maxConnectionHours, setMaxConnectionHours] = useState(8);
+  const [maxConnectionHours, setMaxConnectionHours] = useState(12);
   const [allowOvernight, setAllowOvernight] = useState(false);
   const [noCache, setNoCache] = useState(false);
 

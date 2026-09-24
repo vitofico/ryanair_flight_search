@@ -171,7 +171,7 @@ Intersects the destination lists of both airports to produce the candidate stopo
 ryanair-search search --origin DUB --destination SVQ \
     --start YYYY-MM-DD --end YYYY-MM-DD \
     [--connections BGY,BLQ] [--currency EUR] \
-    [--min-connection-minutes 60] [--max-connection-hours 8] \
+    [--min-connection-minutes 60] [--max-connection-hours 12] \
     [--allow-overnight] [--output table|json] \
     [--no-cache] [--debug]
 ```
@@ -185,7 +185,7 @@ ryanair-search search --origin DUB --destination SVQ \
 | `--connections` | auto | Comma-separated stopovers, overriding `connections.json` |
 | `--currency` | `EUR` | Currency for prices |
 | `--min-connection-minutes` | `60` | Shortest acceptable layover |
-| `--max-connection-hours` | `8` | Longest acceptable layover |
+| `--max-connection-hours` | `12` | Longest acceptable layover |
 | `--allow-overnight` | `false` | Allow the second leg to depart the next day |
 | `--output` | `table` | `table` for humans, `json` for scripts |
 | `--no-cache` | `false` | Bypass the response cache |
