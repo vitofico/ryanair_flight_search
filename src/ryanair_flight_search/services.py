@@ -49,6 +49,7 @@ def search_itineraries(
         min_connection_minutes=min_connection_minutes,
         max_connection_hours=max_connection_hours,
         allow_overnight=allow_overnight,
+        timezones={a["code"]: a["timezone"] for a in client.get_airports() if a["timezone"]},
     )
     searcher = FlightSearcher(client=client, builder=builder)
     return searcher.search(

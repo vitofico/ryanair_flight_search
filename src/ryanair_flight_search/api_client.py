@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -15,13 +15,13 @@ from urllib3.util.retry import Retry
 from .cache import SQLiteCache
 from .config import (
     AIRPORTS_ENDPOINT,
-    AVAILABLE_DATES_ENDPOINT,
     BASE_URL,
     DEFAULT_CURRENCY,
     FARFND_ONEWAY_FARES_ENDPOINT,
     RATE_LIMIT_DELAY_SECONDS,
     REQUEST_TIMEOUT_SECONDS,
     ROUTES_ENDPOINT,
+    TIMETABLE_ENDPOINT,
     USER_AGENT,
 )
 from .exceptions import APIError
@@ -97,7 +97,7 @@ class RyanairAPIClient:
             raise APIError(str(e)) from e
 
     def get_airports(self) -> list[dict[str, str]]:
-        """Get all active Ryanair airports with IATA code, name, and country."""
+        """Get all active Ryanair airports with IATA code, name, country, and time zone."""
         url = BASE_URL + AIRPORTS_ENDPOINT
 
         try:
@@ -117,6 +117,7 @@ class RyanairAPIClient:
                             if isinstance(a.get("country"), dict)
                             else ""
                         ),
+                        "timezone": a.get("timeZone", ""),
                     }
                     for a in data
                     if "code" in a
@@ -124,29 +125,6 @@ class RyanairAPIClient:
             return []
         except APIError:
             return []
-
-    def get_available_dates(self, origin: str, destination: str) -> list[date]:
-        """Get available flight dates for a route."""
-        url = BASE_URL + AVAILABLE_DATES_ENDPOINT.format(
-            origin=origin.upper(), destination=destination.upper()
-        )
-
-        try:
-            data = self._get(url)
-            dates: list[date] = []
-
-            if isinstance(data, list):
-                for date_str in data:
-                    try:
-                        dates.append(datetime.strptime(date_str, "%Y-%m-%d").date())
-                    except (ValueError, TypeError):
-                        continue
-            return dates
-
-        except APIError as e:
-            if e.status_code in (404, 409):
-                return []
-            raise
 
     def get_destinations(self, airport: str) -> list[str]:
         """Get all airports with direct routes from the given airport."""
@@ -169,21 +147,24 @@ class RyanairAPIClient:
     def get_flights(
         self, origin: str, destination: str, date_from: date, date_to: date
     ) -> list[Flight]:
-        """Get available flights for a route and date range via the farfnd API.
+        """Get priced flights for a route and date range.
 
-        Queries each day individually because the farfnd endpoint only returns
-        the single cheapest fare across the entire date range.
+        The farfnd endpoint answers any query with the single cheapest fare that
+        matches it, so a whole-day query hides every other flight that day. The
+        timetable lists each scheduled departure, and each one is priced with a
+        departure-time window that matches only that flight.
         """
         url = BASE_URL + FARFND_ONEWAY_FARES_ENDPOINT
         flights: list[Flight] = []
-        current = date_from
-        while current <= date_to:
-            day_str = current.strftime("%Y-%m-%d")
+        for day, departure_time in self._get_departures(origin, destination, date_from, date_to):
+            day_str = day.strftime("%Y-%m-%d")
             params = {
                 "departureAirportIataCode": origin.upper(),
                 "arrivalAirportIataCode": destination.upper(),
                 "outboundDepartureDateFrom": day_str,
                 "outboundDepartureDateTo": day_str,
+                "outboundDepartureTimeFrom": departure_time,
+                "outboundDepartureTimeTo": departure_time,
                 "currency": self.currency,
             }
             try:
@@ -192,8 +173,30 @@ class RyanairAPIClient:
             except APIError as e:
                 if e.status_code not in (400, 404, 409):
                     raise
-            current += timedelta(days=1)
         return flights
+
+    def _get_departures(
+        self, origin: str, destination: str, date_from: date, date_to: date
+    ) -> list[tuple[date, str]]:
+        """Scheduled departures as (day, "HH:MM") pairs, read month by month."""
+        departures: list[tuple[date, str]] = []
+        year, month = date_from.year, date_from.month
+        while (year, month) <= (date_to.year, date_to.month):
+            url = BASE_URL + TIMETABLE_ENDPOINT.format(
+                origin=origin.upper(), destination=destination.upper(), year=year, month=month
+            )
+            try:
+                data = self._get(url)
+            except APIError as e:
+                if e.status_code not in (400, 404, 409):
+                    raise
+                data = {}
+            for entry in data.get("days", []):
+                day = date(year, month, entry["day"])
+                if date_from <= day <= date_to:
+                    departures.extend((day, f["departureTime"]) for f in entry.get("flights", []))
+            year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+        return departures
 
     def _parse_farfnd_fares(self, data: Any) -> list[Flight]:
         flights: list[Flight] = []

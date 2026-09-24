@@ -38,3 +38,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Monolithic single-file script (`ryanair_search.py`)
+
+### Fixed
+- Search missed every flight on a day except the cheapest one, because Ryanair's fare endpoint returns a single fare per query. Flights are now read from the timetable and priced one by one.
+- Total duration and layover length were computed from local clock times, so trips across time zones (Dublin to Seville, say) were off by an hour, and layovers spanning a daylight-saving change were too. Both are now real elapsed time, using each airport's time zone.
