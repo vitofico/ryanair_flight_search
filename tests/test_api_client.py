@@ -198,3 +198,21 @@ class TestAPIClientErrors:
         with patch.object(client, "_get", return_value=mock_data):
             result = client.get_destinations("CRV")
             assert result == ["BGY", "STN"]
+
+
+class TestGetAirports:
+    def test_includes_time_zone(self):
+        client = RyanairAPIClient()
+        data = [
+            {
+                "code": "DUB",
+                "name": "Dublin",
+                "city": {"name": "Dublin"},
+                "country": {"name": "Ireland"},
+                "timeZone": "Europe/Dublin",
+            }
+        ]
+        with patch.object(client, "_get", return_value=data):
+            [airport] = client.get_airports()
+
+        assert airport["timezone"] == "Europe/Dublin"

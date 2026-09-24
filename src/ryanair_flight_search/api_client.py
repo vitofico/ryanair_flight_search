@@ -97,7 +97,7 @@ class RyanairAPIClient:
             raise APIError(str(e)) from e
 
     def get_airports(self) -> list[dict[str, str]]:
-        """Get all active Ryanair airports with IATA code, name, and country."""
+        """Get all active Ryanair airports with IATA code, name, country, and time zone."""
         url = BASE_URL + AIRPORTS_ENDPOINT
 
         try:
@@ -117,6 +117,7 @@ class RyanairAPIClient:
                             if isinstance(a.get("country"), dict)
                             else ""
                         ),
+                        "timezone": a.get("timeZone", ""),
                     }
                     for a in data
                     if "code" in a
