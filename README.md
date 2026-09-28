@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/web-ui.gif" width="800" alt="The web UI searching Dublin to Seville: the form is filled in, a progress bar runs through eight connection airports, and ranked two-flight itineraries appear, cheapest first at EUR 73.98 via Palma.">
+  <img src="docs/assets/web-ui.gif" width="800" alt="The web UI searching Dublin to Seville: the form is filled in, a progress bar runs through eight connection airports, and ranked two-flight itineraries appear, cheapest first at EUR 76.98 via Palma.">
 </p>
 
 ## What it is
