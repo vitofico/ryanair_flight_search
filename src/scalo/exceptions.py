@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 
-class RyanairSearchError(Exception):
-    """Base exception for all ryanair-flight-search errors."""
+class ScaloError(Exception):
+    """Base exception for all scalo errors."""
 
 
-class APIError(RyanairSearchError):
+class APIError(ScaloError):
     """Error communicating with the Ryanair API."""
 
     def __init__(self, message: str, status_code: int | None = None) -> None:
@@ -15,9 +15,9 @@ class APIError(RyanairSearchError):
         self.status_code = status_code
 
 
-class InvalidRouteError(RyanairSearchError):
+class InvalidRouteError(ScaloError):
     """The requested route does not exist."""
 
 
-class CacheError(RyanairSearchError):
+class CacheError(ScaloError):
     """Error reading from or writing to the cache."""

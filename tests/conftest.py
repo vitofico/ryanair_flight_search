@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import pytest
 
-from ryanair_flight_search.models import Flight
+from scalo.models import Flight
 
 
 @pytest.fixture

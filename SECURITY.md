@@ -10,7 +10,7 @@ Please **do not** open a public GitHub issue for security problems.
 
 Use GitHub's private vulnerability reporting:
 
-**https://github.com/vitofico/ryanair_flight_search/security/advisories/new**
+**https://github.com/vitofico/scalo/security/advisories/new**
 
 Include:
 

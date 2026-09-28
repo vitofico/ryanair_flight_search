@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ryanair_flight_search.cli import (
+from scalo.cli import (
     _build_cache,
     cmd_search,
     load_connections,
@@ -101,7 +101,7 @@ class TestValidateDate:
 class TestConnections:
     def test_save_and_load(self, tmp_path, monkeypatch):
         monkeypatch.setattr(
-            "ryanair_flight_search.cli._connections_path",
+            "scalo.cli._connections_path",
             lambda: tmp_path / "connections.json",
         )
 
@@ -111,14 +111,14 @@ class TestConnections:
 
     def test_load_missing_file(self, tmp_path, monkeypatch):
         monkeypatch.setattr(
-            "ryanair_flight_search.cli._connections_path",
+            "scalo.cli._connections_path",
             lambda: tmp_path / "nonexistent.json",
         )
         assert load_connections("CRV", "SVQ") is None
 
     def test_load_wrong_route(self, tmp_path, monkeypatch):
         monkeypatch.setattr(
-            "ryanair_flight_search.cli._connections_path",
+            "scalo.cli._connections_path",
             lambda: tmp_path / "connections.json",
         )
         save_connections("CRV", "SVQ", ["BGY"])
@@ -128,7 +128,7 @@ class TestConnections:
         path = tmp_path / "connections.json"
         path.write_text("not valid json")
         monkeypatch.setattr(
-            "ryanair_flight_search.cli._connections_path",
+            "scalo.cli._connections_path",
             lambda: path,
         )
         assert load_connections("CRV", "SVQ") is None
@@ -137,7 +137,7 @@ class TestConnections:
         path = tmp_path / "connections.json"
         path.write_text("not valid json")
         monkeypatch.setattr(
-            "ryanair_flight_search.cli._connections_path",
+            "scalo.cli._connections_path",
             lambda: path,
         )
         save_connections("CRV", "SVQ", ["BGY"])
@@ -157,12 +157,12 @@ class TestBuildCache:
 
 class TestMain:
     def test_main_discover(self, monkeypatch):
-        with patch("ryanair_flight_search.cli.cmd_discover") as mock:
+        with patch("scalo.cli.cmd_discover") as mock:
             main(["discover", "--origin", "STN", "--destination", "MAD"])
             mock.assert_called_once()
 
     def test_main_search(self, monkeypatch):
-        with patch("ryanair_flight_search.cli.cmd_search") as mock:
+        with patch("scalo.cli.cmd_search") as mock:
             main(
                 [
                     "search",
@@ -199,7 +199,7 @@ class TestCmdSearch:
 
     def test_search_with_explicit_connections(self, monkeypatch, tmp_path):
         monkeypatch.chdir(tmp_path)
-        with patch("ryanair_flight_search.cli.search_itineraries", return_value=[]) as mock_search:
+        with patch("scalo.cli.search_itineraries", return_value=[]) as mock_search:
             args = parse_args(
                 [
                     "search",

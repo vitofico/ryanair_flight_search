@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- Responsive web GUI (FastAPI + React/Vite) accessible via `ryanair-web` command
+- Responsive web GUI (FastAPI + React/Vite) accessible via `scalo-web` command
 - Real-time search progress via Server-Sent Events (SSE) with polling fallback
 - Airport autocomplete with search by IATA code, city, or country name
 - Itinerary comparison page with cross-search selection, summary strip, and export (JSON/CSV)
@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - "Skip cache" checkbox to force fresh results from Ryanair API
 
 ### Changed
+- Renamed the project to scalo: the repository, the Python package (`scalo`) and the commands (`scalo` and `scalo-web`, formerly `ryanair-search` and `ryanair-web`)
 - Default maximum layover raised from 8 to 12 hours, so connections with a long same-day wait (common on low-frequency routes) show up without tweaking the search
 - CLI refactored to thin adapter using shared service layer
 - Professional `src/` layout with modular package structure

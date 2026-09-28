@@ -49,6 +49,6 @@ jobs:
         with:
           context: .
           push: false
-          tags: ryanair-flight-search:${{ github.sha }}
+          tags: scalo:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

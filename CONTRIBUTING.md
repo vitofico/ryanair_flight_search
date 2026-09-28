@@ -13,8 +13,8 @@ Thanks for taking an interest. This is a small personal project, so please read 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/vitofico/ryanair_flight_search.git
-cd ryanair_flight_search
+git clone https://github.com/vitofico/scalo.git
+cd scalo
 uv sync --group dev
 ```
 

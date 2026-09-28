@@ -25,7 +25,7 @@ def _find_frontend_dist() -> Path | None:
     return None
 
 
-app = FastAPI(title="Ryanair Flight Search", version="0.1.0")
+app = FastAPI(title="Scalo", version="0.1.0")
 
 # The API is unauthenticated and holds no per-user state, so it needs no
 # credentialed cross-origin access. Wildcard origins combined with
@@ -60,7 +60,7 @@ if _frontend_dist is not None:
 def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Ryanair Flight Search Web UI")
+    parser = argparse.ArgumentParser(description="Scalo web UI")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
