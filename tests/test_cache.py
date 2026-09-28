@@ -2,7 +2,7 @@
 
 import time
 
-from ryanair_flight_search.cache import SQLiteCache
+from scalo.cache import SQLiteCache
 
 
 class TestSQLiteCache:

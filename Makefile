@@ -24,7 +24,7 @@ typecheck: ## Type check in strict mode
 check: lint typecheck test ## Run every gate CI runs
 
 run: ## Serve the web UI on http://127.0.0.1:8000
-	uv run ryanair-web
+	uv run scalo-web
 
 docker-build: ## Build the Docker image
 	docker compose build

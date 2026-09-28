@@ -3,8 +3,8 @@
 from datetime import datetime
 from decimal import Decimal
 
-from ryanair_flight_search.itinerary import ItineraryBuilder
-from ryanair_flight_search.models import Flight
+from scalo.itinerary import ItineraryBuilder
+from scalo.models import Flight
 
 
 class TestItineraryBuilder:

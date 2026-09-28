@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ryanair-flight-search"
+name = "scalo"
 version = "0.1.0"
 description = "Find one-stop connecting flights on Ryanair"
 readme = "README.md"
@@ -30,12 +30,12 @@ dependencies = [
 ]
 
 [project.scripts]
-ryanair-search = "ryanair_flight_search.cli:main"
-ryanair-web = "ryanair_flight_search.webapi.main:main"
+scalo = "scalo.cli:main"
+scalo-web = "scalo.webapi.main:main"
 
 [project.urls]
-Repository = "https://github.com/vitofico/ryanair_flight_search"
-Issues = "https://github.com/vitofico/ryanair_flight_search/issues"
+Repository = "https://github.com/vitofico/scalo"
+Issues = "https://github.com/vitofico/scalo/issues"
 
 [dependency-groups]
 dev = [
@@ -60,7 +60,7 @@ quote-style = "double"
 
 [tool.mypy]
 mypy_path = "src"
-packages = ["ryanair_flight_search"]
+packages = ["scalo"]
 python_version = "3.11"
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -81,12 +81,12 @@ module = "sse_starlette.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-addopts = "-q --cov=ryanair_flight_search --cov-report=term-missing --cov-fail-under=80"
+addopts = "-q --cov=scalo --cov-report=term-missing --cov-fail-under=80"
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["src/ryanair_flight_search"]
-omit = ["src/ryanair_flight_search/webapi/*"]
+source = ["src/scalo"]
+omit = ["src/scalo/webapi/*"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ryanair_flight_search"]
+packages = ["src/scalo"]

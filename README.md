@@ -1,4 +1,4 @@
-<h1 align="center">Ryanair Connecting Flight Search</h1>
+<h1 align="center">Scalo</h1>
 
 <p align="center">
   <em>When no single Ryanair flight fits, two might.<br>
@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/vitofico/ryanair_flight_search/actions/workflows/ci.yml"><img src="https://github.com/vitofico/ryanair_flight_search/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/vitofico/scalo/actions/workflows/ci.yml"><img src="https://github.com/vitofico/scalo/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/python-3.11%2B-blue.svg" alt="Python 3.11+">
 </p>
@@ -19,7 +19,7 @@
 
 Say you want to get from Dublin to Seville. There is a direct Ryanair flight, but maybe not on your day, or not at your price. Ryanair also flies Dublin to Palma and Palma to Seville, and Dublin to Barcelona and Barcelona to Seville. It mostly sells its flights one at a time, though, so its search won't offer you those pairs as one trip.
 
-Those trips exist. They are simply two bookings that nobody is joining up for you. This tool does the joining: it finds airports served from both ends, prices each leg separately across a date range, keeps only the pairs that actually connect in time, and ranks what survives by total cost.
+Those trips exist. They are simply two bookings that nobody is joining up for you. Scalo (Italian for a stopover) does the joining: it finds airports served from both ends, prices each leg separately across a date range, keeps only the pairs that actually connect in time, and ranks what survives by total cost.
 
 Two surfaces, same engine:
 
@@ -64,8 +64,8 @@ It queries Ryanair's undocumented public JSON endpoints, the same ones their web
 Requires Python 3.11 or newer.
 
 ```bash
-git clone https://github.com/vitofico/ryanair_flight_search.git
-cd ryanair_flight_search
+git clone https://github.com/vitofico/scalo.git
+cd scalo
 
 uv sync          # recommended
 # or
@@ -89,7 +89,7 @@ The price cache lives in a named volume mounted at `/data`, which is the contain
 The same image carries the CLI:
 
 ```bash
-docker compose run --rm web ryanair-search discover --origin DUB --destination SVQ
+docker compose run --rm web scalo discover --origin DUB --destination SVQ
 ```
 
 Stop and remove the container, keeping the cache:
@@ -105,7 +105,7 @@ docker compose down
 Work out which airports Ryanair serves from **both** your origin and your destination:
 
 ```bash
-ryanair-search discover --origin DUB --destination SVQ
+scalo discover --origin DUB --destination SVQ
 ```
 
 Results are saved to `connections.json`, which `search` picks up automatically.
@@ -113,7 +113,7 @@ Results are saved to `connections.json`, which `search` picks up automatically.
 ### 2. Search
 
 ```bash
-ryanair-search search --origin DUB --destination SVQ \
+scalo search --origin DUB --destination SVQ \
     --start 2026-03-01 --end 2026-03-07
 ```
 
@@ -145,7 +145,7 @@ For development, run the two processes separately:
 
 ```bash
 # Terminal 1: API on :8000
-uv run ryanair-web
+uv run scalo-web
 
 # Terminal 2: Vite dev server on :5173
 cd frontend && npm run dev
@@ -157,7 +157,7 @@ To run it as one process, build the frontend and let the backend serve it:
 
 ```bash
 cd frontend && npm run build
-uv run ryanair-web       # now serves UI + API on :8000
+uv run scalo-web       # now serves UI + API on :8000
 ```
 
 > [!WARNING]
@@ -168,7 +168,7 @@ uv run ryanair-web       # now serves UI + API on :8000
 ### `discover`
 
 ```bash
-ryanair-search discover --origin DUB --destination SVQ [--no-cache] [--debug]
+scalo discover --origin DUB --destination SVQ [--no-cache] [--debug]
 ```
 
 Intersects the destination lists of both airports to produce the candidate stopovers.
@@ -176,7 +176,7 @@ Intersects the destination lists of both airports to produce the candidate stopo
 ### `search`
 
 ```bash
-ryanair-search search --origin DUB --destination SVQ \
+scalo search --origin DUB --destination SVQ \
     --start YYYY-MM-DD --end YYYY-MM-DD \
     [--connections BGY,BLQ] [--currency EUR] \
     [--min-connection-minutes 60] [--max-connection-hours 12] \
@@ -202,7 +202,7 @@ ryanair-search search --origin DUB --destination SVQ \
 Results go to stdout and progress to stderr, so JSON pipes cleanly:
 
 ```bash
-ryanair-search search --origin DUB --destination SVQ \
+scalo search --origin DUB --destination SVQ \
     --start 2026-03-01 --end 2026-03-07 --output json > results.json
 ```
 
@@ -244,7 +244,7 @@ Or use the Makefile. Run `make` on its own to list every target.
 | `docker-build` | build the image without starting it |
 
 ```
-src/ryanair_flight_search/
+src/scalo/
   cli.py          Command-line interface and argument parsing
   api_client.py   Ryanair HTTP client with retries and rate limiting
   cache.py        SQLite response cache

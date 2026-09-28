@@ -3,8 +3,8 @@
 from datetime import date
 from unittest.mock import MagicMock
 
-from ryanair_flight_search.itinerary import ItineraryBuilder
-from ryanair_flight_search.search import FlightSearcher, SearchProgress, _date_range
+from scalo.itinerary import ItineraryBuilder
+from scalo.search import FlightSearcher, SearchProgress, _date_range
 
 
 class TestDateRange:

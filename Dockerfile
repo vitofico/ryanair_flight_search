@@ -9,9 +9,9 @@ RUN npm run build
 # Stage 2: Python runtime
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
-LABEL org.opencontainers.image.title="ryanair-flight-search" \
+LABEL org.opencontainers.image.title="scalo" \
       org.opencontainers.image.description="Find one-stop connecting flights on Ryanair" \
-      org.opencontainers.image.source="https://github.com/vitofico/ryanair_flight_search" \
+      org.opencontainers.image.source="https://github.com/vitofico/scalo" \
       org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app
@@ -22,7 +22,7 @@ RUN uv sync --no-dev --no-install-project --frozen
 
 # Copy source and install the project
 COPY src/ src/
-COPY --from=frontend-build /app/frontend/dist src/ryanair_flight_search/webapi/static/
+COPY --from=frontend-build /app/frontend/dist src/scalo/webapi/static/
 COPY README.md LICENSE ./
 RUN uv sync --no-dev --frozen
 
@@ -34,8 +34,8 @@ WORKDIR /data
 
 # Putting the venv on PATH means both entry points are callable directly, so
 # the image serves the web UI by default and still runs the CLI on demand:
-#   docker run --rm IMAGE ryanair-search discover --origin DUB --destination SVQ
+#   docker run --rm IMAGE scalo discover --origin DUB --destination SVQ
 ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8080
-CMD ["ryanair-web", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["scalo-web", "--host", "0.0.0.0", "--port", "8080"]

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from ryanair_flight_search.models import Itinerary
+from scalo.models import Itinerary
 
 
 class TestFlight:

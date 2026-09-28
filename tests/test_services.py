@@ -4,8 +4,8 @@ from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
-from ryanair_flight_search.models import Flight
-from ryanair_flight_search.services import search_itineraries
+from scalo.models import Flight
+from scalo.services import search_itineraries
 
 
 def test_search_itineraries_measures_duration_in_airport_time_zones():
@@ -27,7 +27,7 @@ def test_search_itineraries_measures_duration_in_airport_time_zones():
         Decimal("45"),
         "EUR",
     )
-    with patch("ryanair_flight_search.services.RyanairAPIClient") as client_cls:
+    with patch("scalo.services.RyanairAPIClient") as client_cls:
         client = client_cls.return_value
         client.get_airports.return_value = [
             {"code": "DUB", "timezone": "Europe/Dublin"},

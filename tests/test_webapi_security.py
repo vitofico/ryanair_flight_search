@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from starlette.testclient import TestClient
 
-from ryanair_flight_search.webapi.main import app
+from scalo.webapi.main import app
 
 
 def test_cors_does_not_reflect_arbitrary_origin() -> None:

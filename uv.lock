@@ -866,7 +866,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ryanair-flight-search"
+name = "scalo"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

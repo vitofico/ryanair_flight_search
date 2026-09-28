@@ -4,8 +4,8 @@ from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
-from ryanair_flight_search.api_client import RyanairAPIClient, parse_datetime
-from ryanair_flight_search.exceptions import APIError
+from scalo.api_client import RyanairAPIClient, parse_datetime
+from scalo.exceptions import APIError
 
 
 class TestParseDatetime:

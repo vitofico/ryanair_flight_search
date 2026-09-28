@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    image: ryanair-flight-search:latest
+    image: scalo:latest
     # Bound to the loopback interface on purpose. The API has no authentication
     # and no rate limiting, and a single search fans out hundreds of requests to
     # Ryanair from this machine's IP address. Publishing on 0.0.0.0 would hand

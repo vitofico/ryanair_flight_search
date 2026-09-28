@@ -3,8 +3,8 @@
 import json
 from decimal import Decimal
 
-from ryanair_flight_search.models import Itinerary
-from ryanair_flight_search.output import (
+from scalo.models import Itinerary
+from scalo.output import (
     format_duration,
     format_price,
     output_json,
