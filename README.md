@@ -1,8 +1,8 @@
 <h1 align="center">Ryanair Connecting Flight Search</h1>
 
 <p align="center">
-  <em>Ryanair won't sell you a connecting ticket.<br>
-  This finds the two flights that make one anyway.</em>
+  <em>When no single Ryanair flight fits, two might.<br>
+  This finds the pairs that connect, cheapest first.</em>
 </p>
 
 <p align="center">
@@ -17,9 +17,9 @@
 
 ## What it is
 
-Say you want to get from Dublin to Seville. Ryanair flies both routes through Milan Bergamo, but it will not sell you Dublin to Seville as one ticket, and searching its site just tells you there are no flights.
+Say you want to get from Dublin to Seville. There is a direct Ryanair flight, but maybe not on your day, or not at your price. Ryanair also flies Dublin to Palma and Palma to Seville, and Dublin to Barcelona and Barcelona to Seville. It mostly sells its flights one at a time, though, so its search won't offer you those pairs as one trip.
 
-There are flights. They are simply two bookings that nobody is joining up for you. This tool does the joining: it finds airports served from both ends, prices each leg separately across a date range, keeps only the pairs that actually connect in time, and ranks what survives by total cost.
+Those trips exist. They are simply two bookings that nobody is joining up for you. This tool does the joining: it finds airports served from both ends, prices each leg separately across a date range, keeps only the pairs that actually connect in time, and ranks what survives by total cost.
 
 Two surfaces, same engine:
 
