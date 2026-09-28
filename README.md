@@ -224,7 +224,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
 ```bash
 uv sync --group dev
-uv run pytest          # 74 tests, 80% coverage floor
+uv run pytest          # 80% coverage floor
 uv run ruff check .    # lint
 uv run ruff format .   # format
 uv run mypy            # strict type check
@@ -235,7 +235,7 @@ Or use the Makefile. Run `make` on its own to list every target.
 | Target | What it does |
 |--------|--------------|
 | `install` | `uv sync --group dev` |
-| `test` | pytest, 74 tests with an 80% coverage floor |
+| `test` | pytest with an 80% coverage floor |
 | `lint` | `ruff check .` and `ruff format --check .` |
 | `format` | reformat in place |
 | `typecheck` | strict mypy |
